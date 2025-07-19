@@ -1,0 +1,31 @@
+version: "3.9"
+name: "todo"
+
+services:
+  db:
+    image: mariadb:11.8.2
+    volumes:
+      - app-db-data:/var/lib/mysql
+    networks:
+      - app-network
+    ports:
+      - "3306:3306"
+    restart: always
+    environment:
+      MARIADB_USER: "db_user"
+      MARIADB_PASSWORD: "db_password"
+      MARIADB_ROOT_PASSWORD: "db_root_password"
+      MARIADB_DATABASE: "db_name"
+  redis:
+    image: redis:8.0
+    networks:
+      - app-network
+    ports:
+      - "6379:6379"
+    restart: always
+
+volumes:
+  app-db-data:
+
+networks:
+  app-network:
