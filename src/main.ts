@@ -3,9 +3,17 @@ import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { AppConfig } from './config/app.config';
 import { ConfigNotInitializedException } from './common/exceptions/config-not-initialized.exception';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      validateCustomDecorators: true,
+      stopAtFirstError: true,
+    }),
+  );
 
   const configService: ConfigService = app.get(ConfigService);
 
