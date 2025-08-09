@@ -7,7 +7,7 @@ import {
 } from 'class-validator';
 
 export class CreateTodoDto {
-  @Length(1, 256)
+  @Length(1, 255)
   @IsString()
   @IsNotEmpty()
   title: string;

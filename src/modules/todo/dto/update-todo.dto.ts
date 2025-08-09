@@ -1,7 +1,7 @@
 import { IsBoolean, IsOptional, IsString, Length } from 'class-validator';
 
 export class UpdateTodoDto {
-  @Length(1, 256)
+  @Length(1, 255)
   @IsString()
   @IsOptional()
   title?: string;

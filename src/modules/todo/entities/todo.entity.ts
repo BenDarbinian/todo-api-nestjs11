@@ -11,7 +11,7 @@ export class Todo {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', length: 256 })
+  @Column({ type: 'varchar', length: 255 })
   title: string;
 
   @Column({ type: 'varchar', length: 512, nullable: true })
