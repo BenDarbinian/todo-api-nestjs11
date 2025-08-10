@@ -15,7 +15,7 @@ export class CreateTodoDto {
   @Length(1, 512)
   @IsString()
   @IsOptional()
-  description?: string;
+  description: string | null = null;
 
   @IsBoolean()
   @IsOptional()

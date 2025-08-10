@@ -15,7 +15,7 @@ export class Todo {
   title: string;
 
   @Column({ type: 'varchar', length: 512, nullable: true })
-  description?: string;
+  description: string | null;
 
   @Column({ type: 'boolean', default: false })
   completed: boolean;
