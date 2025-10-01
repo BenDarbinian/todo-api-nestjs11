@@ -10,14 +10,14 @@ dotenv.config();
 
 export const dataSourceOptions: DataSourceOptions = {
   type: 'mariadb',
-  host: EnvUtils.getEnvVariable<string>('DB_HOST', { type: 'string' }),
+  host: EnvUtils.getEnvVariable<string>('DB_HOST'),
   port: EnvUtils.getEnvVariable<number>('DB_PORT', {
     defaultValue: 3306,
     type: 'number',
   }),
-  database: EnvUtils.getEnvVariable<string>('DB_DATABASE', { type: 'string' }),
-  username: EnvUtils.getEnvVariable<string>('DB_USER', { type: 'string' }),
-  password: EnvUtils.getEnvVariable<string>('DB_PASSWORD', { type: 'string' }),
+  database: EnvUtils.getEnvVariable<string>('DB_DATABASE'),
+  username: EnvUtils.getEnvVariable<string>('DB_USER'),
+  password: EnvUtils.getEnvVariable<string>('DB_PASSWORD'),
   entities,
   migrations: ['dist/database/migrations/*{.ts,.js}'],
   migrationsRun: false,

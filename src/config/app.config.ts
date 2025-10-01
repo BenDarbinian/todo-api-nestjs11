@@ -12,15 +12,12 @@ export default registerAs(
   (): AppConfig => ({
     env: EnvUtils.getEnvVariable('APP_ENV', {
       defaultValue: 'production',
-      type: 'string',
     }),
     host: EnvUtils.getEnvVariable('APP_HOST', {
       defaultValue: '0.0.0.0',
-      type: 'string',
     }),
     port: EnvUtils.getEnvVariable('APP_PORT', {
       defaultValue: 8080,
-      type: 'number',
     }),
   }),
 );

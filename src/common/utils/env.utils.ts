@@ -19,7 +19,7 @@ export class EnvUtils {
    * @returns The parsed value of the environment variable.
    * @throws Will throw an error if the environment variable is not defined and no default value is provided.
    */
-  static getEnvVariable<T extends string | number | boolean>(
+  static getEnvVariable<T extends string | number | boolean = string>(
     name: string,
     options?: {
       defaultValue?: T;
