@@ -1,3 +1,3 @@
-import { Todo } from '../modules/todo/entities/todo.entity';
+import { Task } from '../modules/tasks/entities/task.entity';
 
-export const entities = [Todo];
+export const entities = [Task];

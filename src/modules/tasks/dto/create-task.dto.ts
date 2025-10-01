@@ -6,7 +6,7 @@ import {
   Length,
 } from 'class-validator';
 
-export class CreateTodoDto {
+export class CreateTaskDto {
   @Length(1, 255)
   @IsString()
   @IsNotEmpty()

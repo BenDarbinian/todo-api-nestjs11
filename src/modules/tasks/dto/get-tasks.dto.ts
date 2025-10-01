@@ -1,3 +1,3 @@
 import { BaseGetDto } from '../../../common/dto/base-get.dto';
 
-export class GetTodosDto extends BaseGetDto {}
+export class GetTasksDto extends BaseGetDto {}

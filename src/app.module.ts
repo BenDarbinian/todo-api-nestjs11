@@ -7,7 +7,7 @@ import databaseConfig from './config/database.config';
 import { CacheModule } from '@nestjs/cache-manager';
 import { createKeyv, RedisClientOptions } from '@keyv/redis';
 import redisConfig, { RedisConfig } from './config/redis.config';
-import { TodosModule } from './modules/todo/todos.module';
+import { TasksModule } from './modules/tasks/tasks.module';
 
 @Module({
   imports: [
@@ -54,7 +54,7 @@ import { TodosModule } from './modules/todo/todos.module';
         };
       },
     }),
-    TodosModule,
+    TasksModule,
   ],
   controllers: [],
   providers: [],

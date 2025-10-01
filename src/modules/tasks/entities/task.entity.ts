@@ -6,8 +6,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-@Entity('todos')
-export class Todo {
+@Entity('tasks')
+export class Task {
   @PrimaryGeneratedColumn()
   id: number;
 
