@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { AppConfig } from './config/app.config';
 import { ConfigNotInitializedException } from './common/exceptions/config-not-initialized.exception';
 import { ValidationPipe } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -16,6 +17,20 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
+
+  const config = new DocumentBuilder()
+    .setTitle('Todo API')
+    .setDescription(
+      'API documentation for Todo application - manage tasks and track their completion',
+    )
+    .setVersion('1.0')
+    .addBearerAuth()
+    .addBasicAuth()
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+
+  SwaggerModule.setup('api', app, document);
 
   const configService: ConfigService = app.get(ConfigService);
 
