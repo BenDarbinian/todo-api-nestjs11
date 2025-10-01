@@ -30,11 +30,17 @@ import {
   ApiBody,
   ApiOperation,
 } from '@nestjs/swagger';
+import { TaskMapper } from './mappers/task.mapper';
+import { TaskDto } from './mappers/dto/task.dto';
+import { TaskListDto } from './mappers/dto/task.list.dto';
 
 @ApiTags('tasks')
 @Controller('api/v1/tasks')
 export class TasksController {
-  constructor(private readonly tasksService: TasksService) {}
+  constructor(
+    private readonly tasksService: TasksService,
+    private readonly taskMapper: TaskMapper,
+  ) {}
 
   @Post()
   @ApiOperation({
@@ -44,12 +50,14 @@ export class TasksController {
   })
   @ApiCreatedResponse({
     description: 'The task has been successfully created.',
-    type: Task,
+    type: TaskDto,
   })
   @ApiBadRequestResponse({ description: 'Invalid input data.' })
   @ApiBody({ type: CreateTaskDto })
-  async create(@Body() createTaskDto: CreateTaskDto): Promise<Task> {
-    return this.tasksService.create(createTaskDto);
+  async create(@Body() createTaskDto: CreateTaskDto): Promise<TaskDto> {
+    const task: Task = await this.tasksService.create(createTaskDto);
+
+    return this.taskMapper.toDto(task, TaskDto);
   }
 
   @Get()
@@ -70,9 +78,10 @@ export class TasksController {
     );
 
     return {
-      data: tasks,
+      data: this.taskMapper.toDto(tasks, TaskListDto),
       total,
       page: getTasksDto.page,
+      limit: getTasksDto.limit,
     };
   }
 
@@ -81,17 +90,17 @@ export class TasksController {
     summary: 'Get a task by ID',
     description: 'Retrieves the details of a specific task by its ID.',
   })
-  @ApiOkResponse({ description: 'Task retrieved successfully.', type: Task })
+  @ApiOkResponse({ description: 'Task retrieved successfully.', type: TaskDto })
   @ApiNotFoundResponse({ description: 'Task not found.' })
   @ApiParam({ name: 'id', type: Number, description: 'Task ID' })
-  async findOne(@Param('id', ParseIntPipe) id: number): Promise<Task> {
+  async findOne(@Param('id', ParseIntPipe) id: number): Promise<TaskDto> {
     const task: Task | null = await this.tasksService.findOneById(id);
 
     if (!task) {
       throw new TaskNotFoundException(id);
     }
 
-    return task;
+    return this.taskMapper.toDto(task, TaskDto);
   }
 
   @Put(':id')
@@ -99,7 +108,7 @@ export class TasksController {
     summary: 'Update a task by ID',
     description: 'Updates the details of a specific task by its ID.',
   })
-  @ApiOkResponse({ description: 'Task updated successfully.', type: Task })
+  @ApiOkResponse({ description: 'Task updated successfully.', type: TaskDto })
   @ApiNotFoundResponse({ description: 'Task not found.' })
   @ApiBadRequestResponse({ description: 'Invalid input data.' })
   @ApiParam({ name: 'id', type: Number, description: 'Task ID' })
@@ -107,14 +116,16 @@ export class TasksController {
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateTaskDto: UpdateTaskDto,
-  ): Promise<Task> {
+  ): Promise<TaskDto> {
     const task: Task | null = await this.tasksService.findOneById(id);
 
     if (!task) {
       throw new TaskNotFoundException(id);
     }
 
-    return this.tasksService.update(task, updateTaskDto);
+    const updatedTask = await this.tasksService.update(task, updateTaskDto);
+
+    return this.taskMapper.toDto(updatedTask, TaskDto);
   }
 
   @Delete(':id')

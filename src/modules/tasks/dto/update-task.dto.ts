@@ -14,6 +14,7 @@ export class UpdateTaskDto {
   title: string;
 
   @ApiProperty({
+    type: 'string',
     description: 'The description of the task',
     required: true,
     nullable: true,
