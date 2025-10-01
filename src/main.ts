@@ -10,8 +10,10 @@ async function bootstrap() {
 
   app.useGlobalPipes(
     new ValidationPipe({
-      validateCustomDecorators: true,
+      transform: true,
       stopAtFirstError: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
     }),
   );
 
