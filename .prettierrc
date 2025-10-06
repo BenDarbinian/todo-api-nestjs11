@@ -1,5 +1,14 @@
 {
   "singleQuote": true,
   "trailingComma": "all",
-  "endOfLine": "auto"
+  "endOfLine": "auto",
+  "printWidth": 80,
+  "overrides": [
+    {
+      "files": ["src/database/migrations/**/*.ts"],
+      "options": {
+        "printWidth": 1000
+      }
+    }
+  ]
 }
