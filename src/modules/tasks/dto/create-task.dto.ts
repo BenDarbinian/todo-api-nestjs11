@@ -1,4 +1,10 @@
-import { IsBoolean, IsNotEmpty, IsString, Length } from 'class-validator';
+import {
+  IsBoolean,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Length,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateTaskDto {
@@ -11,7 +17,7 @@ export class CreateTaskDto {
   @Length(1, 255)
   @IsString()
   @IsNotEmpty()
-  title: string;
+  readonly title: string;
 
   @ApiProperty({
     type: 'string',
@@ -24,8 +30,8 @@ export class CreateTaskDto {
   })
   @Length(1, 512)
   @IsString()
-  @IsNotEmpty()
-  description: string | null;
+  @IsOptional()
+  readonly description: string | null = null;
 
   @ApiProperty({
     description: 'Indicates if the task is completed',
@@ -34,5 +40,5 @@ export class CreateTaskDto {
   })
   @IsBoolean()
   @IsNotEmpty()
-  completed: boolean;
+  readonly completed: boolean;
 }

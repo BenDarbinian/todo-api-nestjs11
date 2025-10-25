@@ -1,4 +1,4 @@
-import { IsOptional, IsPositive, Max } from 'class-validator';
+import { Allow, IsOptional, IsPositive, Max } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -13,7 +13,7 @@ export class BaseGetDto {
   @IsPositive()
   @IsOptional()
   @Type(() => Number)
-  page: number = 1;
+  readonly page: number = 1;
 
   @ApiProperty({
     description: 'Number of items per page',
@@ -25,7 +25,7 @@ export class BaseGetDto {
   @IsPositive()
   @IsOptional()
   @Type(() => Number)
-  limit: number = 10;
+  readonly limit: number = 10;
 
   get skip() {
     return (this.page - 1) * this.limit;
