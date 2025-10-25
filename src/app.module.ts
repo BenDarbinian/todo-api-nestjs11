@@ -8,12 +8,17 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { createKeyv, RedisClientOptions } from '@keyv/redis';
 import redisConfig, { RedisConfig } from './config/redis.config';
 import { TasksModule } from './modules/tasks/tasks.module';
+import { UsersModule } from './modules/users/users.module';
+import { HashModule } from './common/hash/hash.module';
+import sessionConfig from './config/session.config';
+import jwtConfig from './config/jwt.config';
+import { AuthModule } from './common/auth/auth.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, databaseConfig, redisConfig],
+      load: [appConfig, databaseConfig, redisConfig, sessionConfig, jwtConfig],
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
@@ -55,6 +60,9 @@ import { TasksModule } from './modules/tasks/tasks.module';
       },
     }),
     TasksModule,
+    UsersModule,
+    HashModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],
