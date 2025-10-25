@@ -3,6 +3,9 @@ import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class BaseGetDto {
+  @Allow()
+  private _skip: number | undefined;
+
   @ApiProperty({
     description: 'Page number for pagination',
     required: false,
@@ -27,7 +30,10 @@ export class BaseGetDto {
   @Type(() => Number)
   readonly limit: number = 10;
 
-  get skip() {
-    return (this.page - 1) * this.limit;
+  get skip(): number {
+    if (this._skip === undefined) {
+      return (this.page - 1) * this.limit;
+    }
+    return this._skip;
   }
 }
