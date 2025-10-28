@@ -9,6 +9,8 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { Squish } from '../../../common/transformers/squish.transformer';
 import { Trim } from '../../../common/transformers/trim.transformer';
+import { CorrectEmailTypos } from '../../../common/transformers/correct-email-typos.transformer';
+import { NormalizeEmail } from '../../../common/transformers/normalize-email.transformer';
 
 export class CreateUserDto {
   @ApiProperty({
@@ -37,6 +39,8 @@ export class CreateUserDto {
   @MaxLength(255)
   @IsEmail()
   @IsNotEmpty()
+  @NormalizeEmail()
+  @CorrectEmailTypos()
   @Trim()
   readonly email: string;
 
