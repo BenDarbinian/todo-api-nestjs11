@@ -4,6 +4,7 @@ import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserInput } from './interfaces/create-user.input.interface';
 import { HashService } from '../../common/hash/hash.service';
+import { ValidatePasswordInput } from './interfaces/validate-password.input.interface';
 
 @Injectable()
 export class UsersService {
@@ -67,6 +68,56 @@ export class UsersService {
     }
 
     return this.userRepository.exists({ where });
+  }
+
+  updateName(user: User, name: string): void {
+    user.name = name;
+  }
+
+  async updateEmail(user: User, email: string): Promise<void> {
+    if (
+      user.email !== email &&
+      (await this.existsBy('email', email, user.id))
+    ) {
+      throw new BadRequestException(
+        `User with email "${email}" already exists.`,
+      );
+    }
+
+    user.email = email;
+  }
+
+  async validatePassword(
+    user: User,
+    data: ValidatePasswordInput,
+  ): Promise<void> {
+    const isOldPasswordCorrect = await this.hashService.compare(
+      data.oldPassword,
+      user.passwordHash,
+    );
+
+    if (data.oldPassword === data.newPassword) {
+      throw new BadRequestException(
+        'New password cannot be the same as the old password.',
+      );
+    }
+
+    if (!isOldPasswordCorrect) {
+      throw new BadRequestException(
+        'The old password you entered is incorrect.',
+      );
+    }
+
+    if (data.newPassword !== data.confirmPassword) {
+      throw new BadRequestException(
+        'New password and confirmation do not match.',
+      );
+    }
+  }
+
+  async changePassword(user: User, newPassword: string): Promise<void> {
+    user.passwordHash = await this.hashService.hash(newPassword);
+    user.passwordChangedAt = new Date();
   }
 
   async save(user: User): Promise<User> {
