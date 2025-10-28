@@ -7,6 +7,8 @@ import {
   MinLength,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Squish } from '../../../common/transformers/squish.transformer';
+import { Trim } from '../../../common/transformers/trim.transformer';
 
 export class CreateUserDto {
   @ApiProperty({
@@ -21,6 +23,7 @@ export class CreateUserDto {
   @Length(2, 255)
   @IsString()
   @IsNotEmpty()
+  @Squish()
   readonly name: string;
 
   @ApiProperty({
@@ -34,6 +37,7 @@ export class CreateUserDto {
   @MaxLength(255)
   @IsEmail()
   @IsNotEmpty()
+  @Trim()
   readonly email: string;
 
   @ApiProperty({

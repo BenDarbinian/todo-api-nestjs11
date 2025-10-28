@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, MaxLength } from 'class-validator';
+import { Trim } from '../../../../common/transformers/trim.transformer';
 
 export class UpdateProfileEmailDto {
   @ApiProperty({
@@ -13,5 +14,6 @@ export class UpdateProfileEmailDto {
   @MaxLength(255)
   @IsEmail()
   @IsNotEmpty()
+  @Trim()
   readonly email: string;
 }
