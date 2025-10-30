@@ -10,15 +10,15 @@ import {
   HttpCode,
   Put,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
-import { TasksService } from './tasks.service';
-import { CreateTaskDto } from './dto/create-task.dto';
-import { UpdateTaskDto } from './dto/update-task.dto';
-import { GetTasksDto } from './dto/get-tasks.dto';
-import { TasksPaginatedResponseDto } from './dto/tasks-paginated-response.dto';
-import { Task } from './entities/task.entity';
-import { TaskNotFoundException } from './exceptions/task-not-found.exception';
-import { DeleteResult } from 'typeorm';
+import { TasksService } from '../tasks.service';
+import { CreateTaskDto } from '../dto/create-task.dto';
+import { UpdateTaskDto } from '../dto/update-task.dto';
+import { GetTasksDto } from '../dto/get-tasks.dto';
+import { TasksPaginatedResponseDto } from '../dto/tasks-paginated-response.dto';
+import { Task } from '../entities/task.entity';
+import { TaskNotFoundException } from '../exceptions/task-not-found.exception';
 import {
   ApiCreatedResponse,
   ApiOkResponse,
@@ -29,14 +29,20 @@ import {
   ApiParam,
   ApiBody,
   ApiOperation,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
-import { TaskMapper } from './mappers/task.mapper';
-import { TaskDto } from './mappers/dto/task.dto';
-import { TaskListDto } from './mappers/dto/task.list.dto';
+import { TaskMapper } from '../mappers/task.mapper';
+import { TaskDto } from '../mappers/dto/task.dto';
+import { TaskListDto } from '../mappers/dto/task.list.dto';
+import { JwtAuthGuard } from '../../../common/auth/guards/jwt-auth.guard';
+import { User } from '../../../common/decorators/user.decorator';
+import { User as UserEntity } from '../../users/entities/user.entity';
 
-@ApiTags('tasks')
-@Controller('api/v1/tasks')
-export class TasksController {
+@ApiTags('Profile Tasks')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
+@Controller('api/v1/users/me/tasks')
+export class ProfileTasksController {
   constructor(
     private readonly tasksService: TasksService,
     private readonly taskMapper: TaskMapper,
@@ -46,7 +52,7 @@ export class TasksController {
   @ApiOperation({
     summary: 'Create a new task',
     description:
-      'Creates a new task with the provided details. The task will be marked as not completedby default.',
+      'Creates a new task with the provided details. The task will be marked as not completed by default.',
   })
   @ApiCreatedResponse({
     description: 'The task has been successfully created.',
@@ -54,8 +60,16 @@ export class TasksController {
   })
   @ApiBadRequestResponse({ description: 'Invalid input data.' })
   @ApiBody({ type: CreateTaskDto })
-  async create(@Body() createTaskDto: CreateTaskDto): Promise<TaskDto> {
-    const task: Task = await this.tasksService.create(createTaskDto);
+  async create(
+    @User() user: UserEntity,
+    @Body() dto: CreateTaskDto,
+  ): Promise<TaskDto> {
+    const task: Task = await this.tasksService.create({
+      title: dto.title,
+      description: dto.description,
+      completed: dto.completed,
+      user,
+    });
 
     return this.taskMapper.toDto(task, TaskDto);
   }
@@ -70,18 +84,21 @@ export class TasksController {
     type: TasksPaginatedResponseDto,
   })
   async findAll(
-    @Query() getTasksDto: GetTasksDto,
+    @User() user: UserEntity,
+    @Query() dto: GetTasksDto,
   ): Promise<TasksPaginatedResponseDto> {
-    const [tasks, total] = await this.tasksService.findAndCount(
-      getTasksDto.limit,
-      getTasksDto.skip,
-    );
+    const [tasks, total] = await this.tasksService.findAndCount({
+      limit: dto.limit,
+      page: dto.page,
+      skip: dto.skip,
+      userId: user.id,
+    });
 
     return {
       data: this.taskMapper.toDto(tasks, TaskListDto),
       total,
-      page: getTasksDto.page,
-      limit: getTasksDto.limit,
+      page: dto.page,
+      limit: dto.limit,
     };
   }
 
@@ -93,8 +110,13 @@ export class TasksController {
   @ApiOkResponse({ description: 'Task retrieved successfully.', type: TaskDto })
   @ApiNotFoundResponse({ description: 'Task not found.' })
   @ApiParam({ name: 'id', type: Number, description: 'Task ID' })
-  async findOne(@Param('id', ParseIntPipe) id: number): Promise<TaskDto> {
-    const task: Task | null = await this.tasksService.findOneById(id);
+  async findOne(
+    @User() user: UserEntity,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<TaskDto> {
+    const task: Task | null = await this.tasksService.findOneById(id, {
+      userId: user.id,
+    });
 
     if (!task) {
       throw new TaskNotFoundException(id);
@@ -114,10 +136,13 @@ export class TasksController {
   @ApiParam({ name: 'id', type: Number, description: 'Task ID' })
   @ApiBody({ type: UpdateTaskDto })
   async update(
+    @User() user: UserEntity,
     @Param('id', ParseIntPipe) id: number,
     @Body() updateTaskDto: UpdateTaskDto,
   ): Promise<TaskDto> {
-    const task: Task | null = await this.tasksService.findOneById(id);
+    const task: Task | null = await this.tasksService.findOneById(id, {
+      userId: user.id,
+    });
 
     if (!task) {
       throw new TaskNotFoundException(id);
@@ -137,11 +162,18 @@ export class TasksController {
   @ApiNotFoundResponse({ description: 'Task not found.' })
   @ApiParam({ name: 'id', type: Number, description: 'Task ID' })
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    const deleted: DeleteResult = await this.tasksService.delete(id);
+  async remove(
+    @User() user: UserEntity,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<void> {
+    const task: Task | null = await this.tasksService.findOneById(id, {
+      userId: user.id,
+    });
 
-    if (deleted.affected === 0) {
+    if (!task) {
       throw new TaskNotFoundException(id);
     }
+
+    await this.tasksService.delete(id);
   }
 }

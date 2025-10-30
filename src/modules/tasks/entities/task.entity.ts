@@ -2,9 +2,12 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { User } from '../../users/entities/user.entity';
 
 @Entity('tasks')
 export class Task {
@@ -19,6 +22,13 @@ export class Task {
 
   @Column({ type: 'boolean', default: false })
   completed: boolean;
+
+  @ManyToOne(() => User, (user) => user.tasks)
+  @JoinColumn({ name: 'user_id' })
+  user: User;
+
+  @Column({ type: 'int', nullable: false })
+  userId: number;
 
   @CreateDateColumn()
   createdAt: Date;

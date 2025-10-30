@@ -2,9 +2,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Task } from '../../tasks/entities/task.entity';
 
 @Entity('users')
 export class User {
@@ -22,6 +24,11 @@ export class User {
 
   @Column({ type: 'datetime', precision: 6 })
   passwordChangedAt: Date;
+
+  @OneToMany(() => Task, (task) => task.user, {
+    onDelete: 'CASCADE',
+  })
+  tasks: Task[];
 
   @CreateDateColumn()
   createdAt: Date;
