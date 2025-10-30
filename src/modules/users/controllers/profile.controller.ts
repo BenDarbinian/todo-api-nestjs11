@@ -55,7 +55,7 @@ export class ProfileController {
   }
 
   @ApiOperation({
-    summary: 'Change user name',
+    summary: 'Change profile name',
     description: 'Changes the name of the authenticated user',
   })
   @ApiResponse({
@@ -79,7 +79,7 @@ export class ProfileController {
   }
 
   @ApiOperation({
-    summary: 'Change user email',
+    summary: 'Change profile email',
     description: 'Changes the email of the authenticated user',
   })
   @ApiResponse({
@@ -103,7 +103,7 @@ export class ProfileController {
   }
 
   @ApiOperation({
-    summary: 'Change user password',
+    summary: 'Change profile password',
     description:
       'Changes the password of the authenticated user after validating the current password',
   })
