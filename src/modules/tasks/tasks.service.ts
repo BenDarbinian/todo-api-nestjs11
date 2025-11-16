@@ -1,9 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { CreateTaskDto } from './dto/create-task.dto';
-import { UpdateTaskDto } from './dto/update-task.dto';
-import { DeleteResult, Repository } from 'typeorm';
+import {
+  DeleteResult,
+  FindManyOptions,
+  FindOptionsWhere,
+  Repository,
+} from 'typeorm';
 import { Task } from './entities/task.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CreateTaskInput } from './interfaces/create-task.input.interface';
+import { UpdateTaskInput } from './interfaces/update-task.input.interface';
+import { GetTasksInput } from './interfaces/get-tasks.input.interface';
 
 @Injectable()
 export class TasksService {
@@ -12,27 +18,36 @@ export class TasksService {
     private readonly taskRepository: Repository<Task>,
   ) {}
 
-  async create(createTaskDto: CreateTaskDto): Promise<Task> {
+  async create(data: CreateTaskInput): Promise<Task> {
     const task = new Task();
 
-    task.title = createTaskDto.title;
-    task.description = createTaskDto.description;
-    task.completed = createTaskDto.completed;
+    task.title = data.title;
+    task.description = data.description;
+    task.completed = data.completed;
+    task.user = data.user;
 
     return this.taskRepository.save(task);
   }
 
-  async findAndCount(take: number, skip: number): Promise<[Task[], number]> {
-    return this.taskRepository.findAndCount({
-      take,
-      skip,
-    });
+  async findAndCount(data: GetTasksInput): Promise<[Task[], number]> {
+    const options: FindManyOptions<Task> = {
+      take: data.limit,
+      skip: data.skip,
+    };
+
+    if (data.userId !== undefined) {
+      options.where = {
+        userId: data.userId,
+      };
+    }
+
+    return this.taskRepository.findAndCount(options);
   }
 
-  async update(task: Task, updateTaskDto: UpdateTaskDto): Promise<Task> {
-    task.title = updateTaskDto.title;
-    task.description = updateTaskDto.description;
-    task.completed = updateTaskDto.completed;
+  async update(task: Task, data: UpdateTaskInput): Promise<Task> {
+    task.title = data.title;
+    task.description = data.description;
+    task.completed = data.completed;
 
     return this.taskRepository.save(task);
   }
@@ -41,16 +56,21 @@ export class TasksService {
     return this.taskRepository.delete(id);
   }
 
-  private async findOneBy<K extends keyof Task>(
-    field: K,
-    value: Task[K],
+  async findOneBy(
+    conditions: FindOptionsWhere<Task> | FindOptionsWhere<Task>[] | undefined,
   ): Promise<Task | null> {
     return this.taskRepository.findOne({
-      where: { [field]: value },
+      where: conditions,
     });
   }
 
-  async findOneById(id: number): Promise<Task | null> {
-    return this.findOneBy('id', id);
+  async findOneById(
+    id: number,
+    filters?: FindOptionsWhere<Task> | FindOptionsWhere<Task>[],
+  ): Promise<Task | null> {
+    return this.findOneBy({
+      id,
+      ...filters,
+    });
   }
 }

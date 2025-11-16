@@ -27,6 +27,7 @@ export class CreateTaskDto {
     minLength: 1,
     maxLength: 512,
     example: 'Milk, eggs, bread, and fruits',
+    default: null,
   })
   @Length(1, 512)
   @IsString()
@@ -35,10 +36,11 @@ export class CreateTaskDto {
 
   @ApiProperty({
     description: 'Indicates if the task is completed',
-    required: true,
+    required: false,
     example: false,
+    default: false,
   })
   @IsBoolean()
-  @IsNotEmpty()
-  readonly completed: boolean;
+  @IsOptional()
+  readonly completed: boolean = false;
 }
