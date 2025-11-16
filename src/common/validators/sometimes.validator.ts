@@ -1,0 +1,31 @@
+import type { ValidationOptions } from 'class-validator';
+import { ValidateIf } from 'class-validator';
+
+/**
+ * Only validates the given value if it is not `undefined`.
+ *
+ * This is similar to the built-in `@IsOptional` except that it does not allow `null`. Note that this validator does not
+ * work as expected with `{ each: true }` (because it is based on `@ValidateIf` which does not either).
+ *
+ * #### Example
+ * ```typescript
+ * // Ensure the value is a string or undefined (but not null).
+ * @Sometimes()
+ * @IsString()
+ * value?: string
+ * ```
+ *
+ * @param options Generic class-validator options.
+ */
+export function Sometimes(options?: ValidationOptions): PropertyDecorator {
+  return function sometimesDecorator(
+    prototype: object,
+    propertyKey: string | symbol,
+  ): void {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    ValidateIf((object) => object[propertyKey] !== undefined, options)(
+      prototype,
+      propertyKey,
+    );
+  };
+}
