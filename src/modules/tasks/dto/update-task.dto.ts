@@ -1,28 +1,25 @@
-import {
-  IsBoolean,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  Length,
-} from 'class-validator';
+import { IsBoolean, IsString, Length } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Sometimes } from '../../../common/validators/sometimes.validator';
+import { Nullable } from '../../../common/validators/nullable.validator';
 
 export class UpdateTaskDto {
   @ApiProperty({
     description: 'The title of the task',
     minLength: 1,
     maxLength: 255,
+    required: false,
     example: 'Buy groceries',
   })
   @Length(1, 255)
   @IsString()
-  @IsNotEmpty()
-  readonly title: string;
+  @Sometimes()
+  readonly title?: string;
 
   @ApiProperty({
     type: 'string',
     description: 'The description of the task',
-    required: true,
+    required: false,
     nullable: true,
     minLength: 1,
     maxLength: 512,
@@ -30,15 +27,16 @@ export class UpdateTaskDto {
   })
   @Length(1, 512)
   @IsString()
-  @IsOptional()
-  readonly description: string | null = null;
+  @Nullable()
+  @Sometimes()
+  readonly description: string | null;
 
   @ApiProperty({
     description: 'Indicates if the task is completed',
-    required: true,
+    required: false,
     example: true,
   })
   @IsBoolean()
-  @IsNotEmpty()
-  readonly completed: boolean;
+  @Sometimes()
+  readonly completed?: boolean;
 }

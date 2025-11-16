@@ -8,9 +8,9 @@ import {
   Query,
   ParseIntPipe,
   HttpCode,
-  Put,
   HttpStatus,
   UseGuards,
+  Patch,
 } from '@nestjs/common';
 import { TasksService } from '../tasks.service';
 import { CreateTaskDto } from '../dto/create-task.dto';
@@ -125,7 +125,7 @@ export class ProfileTasksController {
     return this.taskMapper.toDto(task, TaskDto);
   }
 
-  @Put(':id')
+  @Patch(':id')
   @ApiOperation({
     summary: 'Update a task by ID',
     description: 'Updates the details of a specific task by its ID.',

@@ -45,9 +45,17 @@ export class TasksService {
   }
 
   async update(task: Task, data: UpdateTaskInput): Promise<Task> {
-    task.title = data.title;
-    task.description = data.description;
-    task.completed = data.completed;
+    if (data.title !== undefined) {
+      task.title = data.title;
+    }
+
+    if (data.description !== undefined) {
+      task.description = data.description;
+    }
+
+    if (data.completed !== undefined) {
+      task.completed = data.completed;
+    }
 
     return this.taskRepository.save(task);
   }
