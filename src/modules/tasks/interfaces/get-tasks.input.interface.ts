@@ -3,4 +3,6 @@ export interface GetTasksInput {
   page: number;
   skip: number;
   userId?: number;
+  isParent: boolean;
+  relations?: string[];
 }

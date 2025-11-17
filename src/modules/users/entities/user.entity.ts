@@ -25,9 +25,7 @@ export class User {
   @Column({ type: 'datetime', precision: 6 })
   passwordChangedAt: Date;
 
-  @OneToMany(() => Task, (task) => task.user, {
-    onDelete: 'CASCADE',
-  })
+  @OneToMany(() => Task, (task) => task.user)
   tasks: Task[];
 
   @CreateDateColumn()

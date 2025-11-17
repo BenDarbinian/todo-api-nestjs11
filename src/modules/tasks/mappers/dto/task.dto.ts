@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
+import { ChildTaskDto } from './child-task.dto';
 
 export class TaskDto {
   @ApiProperty({
@@ -8,6 +9,13 @@ export class TaskDto {
   })
   @Expose()
   id: number;
+
+  @ApiProperty({
+    description: 'Indicates if the task has children tasks',
+    example: false,
+  })
+  @Expose()
+  hasChildren: boolean;
 
   @ApiProperty({
     description: 'The title of the task',
@@ -31,6 +39,14 @@ export class TaskDto {
   })
   @Expose()
   completed: boolean;
+
+  @ApiProperty({
+    type: [ChildTaskDto],
+    description: 'The children tasks of the task',
+  })
+  @Type(() => ChildTaskDto)
+  @Expose()
+  children: ChildTaskDto[];
 
   @ApiProperty({
     description: 'The date and time when the task was created',

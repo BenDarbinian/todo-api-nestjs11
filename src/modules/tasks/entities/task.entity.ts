@@ -4,6 +4,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -14,6 +15,21 @@ export class Task {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @ManyToOne(() => Task, (task) => task.children, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'parent_id' })
+  parent?: Task | null;
+
+  @Column({ type: 'int', nullable: true })
+  parentId: number | null;
+
+  @OneToMany(() => Task, (task) => task.parent, {
+    cascade: true,
+  })
+  children?: Task[];
+
   @Column({ type: 'varchar', length: 255 })
   title: string;
 
@@ -23,9 +39,12 @@ export class Task {
   @Column({ type: 'boolean', default: false })
   completed: boolean;
 
-  @ManyToOne(() => User, (user) => user.tasks)
+  @ManyToOne(() => User, (user) => user.tasks, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'user_id' })
-  user: User;
+  user?: User;
 
   @Column({ type: 'int', nullable: false })
   userId: number;
@@ -35,4 +54,12 @@ export class Task {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  get hasChildren(): boolean {
+    if (this.children === undefined) {
+      throw new Error('Children are not initialized');
+    }
+
+    return this.children.length > 0;
+  }
 }

@@ -1,10 +1,4 @@
-import {
-  IsBoolean,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  Length,
-} from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateTaskDto {
@@ -33,14 +27,4 @@ export class CreateTaskDto {
   @IsString()
   @IsOptional()
   readonly description: string | null = null;
-
-  @ApiProperty({
-    description: 'Indicates if the task is completed',
-    required: false,
-    example: false,
-    default: false,
-  })
-  @IsBoolean()
-  @IsOptional()
-  readonly completed: boolean = false;
 }
