@@ -4,10 +4,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Task } from './entities/task.entity';
 import { TaskMapper } from './mappers/task.mapper';
 import { ProfileTasksController } from './controllers/profile-tasks.controller';
+import { ProfileSubtasksController } from './controllers/profile-subtasks.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Task])],
-  controllers: [ProfileTasksController],
+  controllers: [ProfileTasksController, ProfileSubtasksController],
   providers: [TasksService, TaskMapper],
 })
 export class TasksModule {}
