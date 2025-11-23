@@ -55,11 +55,11 @@ export class Task {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  get hasChildren(): boolean {
+  get childrenCount(): number {
     if (this.children === undefined) {
       throw new Error('Children are not initialized');
     }
 
-    return this.children.length > 0;
+    return this.children.length;
   }
 }

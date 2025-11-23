@@ -10,11 +10,11 @@ export class TaskListDto {
   id: number;
 
   @ApiProperty({
-    description: 'Indicates if the task has children tasks',
-    example: false,
+    description: 'The number of children tasks',
+    example: 0,
   })
   @Expose()
-  hasChildren: boolean;
+  childrenCount: number;
 
   @ApiProperty({
     description: 'The title of the task',
