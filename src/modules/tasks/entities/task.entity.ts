@@ -62,4 +62,12 @@ export class Task {
 
     return this.children.length;
   }
+
+  get areAllChildrenCompleted(): boolean {
+    if (this.children === undefined) {
+      throw new Error('Children are not initialized');
+    }
+
+    return this.children.every((child) => child.completed);
+  }
 }

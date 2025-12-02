@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import {
   DeleteResult,
   FindManyOptions,
@@ -52,6 +52,12 @@ export class TasksService {
       };
     }
 
+    if (data.parentId !== undefined) {
+      options.where = {
+        parentId: data.parentId,
+      };
+    }
+
     return this.taskRepository.findAndCount(options);
   }
 
@@ -65,6 +71,12 @@ export class TasksService {
     }
 
     if (data.completed !== undefined) {
+      if (!task.parentId && task.childrenCount) {
+        throw new BadRequestException(
+          'Task will be completed when subtasks finish',
+        );
+      }
+
       task.completed = data.completed;
     }
   }

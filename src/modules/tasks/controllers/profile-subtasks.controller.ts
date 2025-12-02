@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   UseGuards,
   Patch,
+  Get,
 } from '@nestjs/common';
 import { TasksService } from '../tasks.service';
 import { Task } from '../entities/task.entity';
@@ -31,6 +32,7 @@ import { IsNull } from 'typeorm';
 import { CreateSubtaskDto } from '../dto/create-subtask.dto';
 import { UpdateSubtaskDto } from '../dto/update-subtask.dto';
 import { SubtaskNotFoundException } from '../exceptions/subtask-not-found.exception';
+import { ChildTaskDto } from '../mappers/dto/child-task.dto';
 
 @ApiTags('Profile Subtasks')
 @UseGuards(JwtAuthGuard)
@@ -41,6 +43,29 @@ export class ProfileSubtasksController {
     private readonly tasksService: TasksService,
     private readonly taskMapper: TaskMapper,
   ) {}
+
+  @Get()
+  @ApiOperation({
+    summary: 'Get all subtasks for a task',
+    description: 'Retrieves all subtasks for the specified task ID.',
+  })
+  @ApiOkResponse({
+    description: 'List of subtasks for the specified task.',
+    type: [ChildTaskDto],
+  })
+  @ApiNotFoundResponse({ description: 'Task not found.' })
+  @ApiParam({ name: 'id', type: Number, description: 'Task ID' })
+  async findAll(
+    @User() user: UserEntity,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ChildTaskDto[]> {
+    const [tasks] = await this.tasksService.findAndCount({
+      userId: user.id,
+      parentId: id,
+    });
+
+    return this.taskMapper.toDto(tasks, ChildTaskDto);
+  }
 
   @Post()
   @ApiOperation({
@@ -83,6 +108,8 @@ export class ProfileSubtasksController {
     }
 
     task.children.push(subtask);
+
+    task.completed = task.areAllChildrenCompleted;
 
     const updatedTask = await this.tasksService.save(task);
 
@@ -135,10 +162,13 @@ export class ProfileSubtasksController {
 
     this.tasksService.update(subtask, updateSubtaskDto);
 
+    task.completed = task.areAllChildrenCompleted;
+
     const updatedTask = await this.tasksService.save(task);
 
     return this.taskMapper.toDto(updatedTask, TaskDto);
   }
+
   @Delete(':subtaskId')
   @ApiOperation({
     summary: 'Delete a subtask by ID',
@@ -174,6 +204,8 @@ export class ProfileSubtasksController {
     }
 
     task.children = task.children.filter((subtask) => subtask.id !== subtaskId);
+
+    task.completed = task.areAllChildrenCompleted;
 
     const updatedTask = await this.tasksService.save(task);
 
