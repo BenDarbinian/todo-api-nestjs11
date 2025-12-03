@@ -72,7 +72,7 @@ export class ProfileTasksController {
     });
 
     if (dto.subtasks.length > 0) {
-      task.children = dto.subtasks.map((dto) => {
+      task.subtasks = dto.subtasks.map((dto) => {
         return this.tasksService.create({
           title: dto.title,
           user,
@@ -104,7 +104,7 @@ export class ProfileTasksController {
       skip: dto.skip,
       userId: user.id,
       isParent: true,
-      relations: ['children'],
+      relations: ['subtasks'],
     });
 
     return {
@@ -133,7 +133,7 @@ export class ProfileTasksController {
         userId: user.id,
         parentId: IsNull(),
       },
-      ['children'],
+      ['subtasks'],
     );
 
     if (!task) {
@@ -164,7 +164,7 @@ export class ProfileTasksController {
         userId: user.id,
         parentId: IsNull(),
       },
-      ['children'],
+      ['subtasks'],
     );
 
     if (!task) {

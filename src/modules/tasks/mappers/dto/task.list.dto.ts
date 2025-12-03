@@ -10,11 +10,11 @@ export class TaskListDto {
   id: number;
 
   @ApiProperty({
-    description: 'The number of children tasks',
+    description: 'The number of subtasks',
     example: 0,
   })
   @Expose()
-  childrenCount: number;
+  subtasksCount: number;
 
   @ApiProperty({
     description: 'The title of the task',

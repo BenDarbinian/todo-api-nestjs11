@@ -71,7 +71,7 @@ export class TasksService {
     }
 
     if (data.completed !== undefined) {
-      if (!task.parentId && task.childrenCount) {
+      if (!task.parentId && task.subtasksCount) {
         throw new BadRequestException(
           'Task will be completed when all subtasks are finished',
         );
@@ -91,7 +91,7 @@ export class TasksService {
   ): Promise<Task | null> {
     return this.taskRepository.findOne({
       where: conditions,
-      relations: relations?.length ? { children: true } : undefined,
+      relations: relations?.length ? { subtasks: true } : undefined,
     });
   }
 

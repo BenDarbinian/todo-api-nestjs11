@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 
-export class ChildTaskDto {
+export class SubtaskDto {
   @ApiProperty({
     description: 'Unique identifier of the subtask',
     example: 1,

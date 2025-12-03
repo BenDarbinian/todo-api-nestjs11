@@ -32,7 +32,7 @@ import { IsNull } from 'typeorm';
 import { CreateSubtaskDto } from '../dto/create-subtask.dto';
 import { UpdateSubtaskDto } from '../dto/update-subtask.dto';
 import { SubtaskNotFoundException } from '../exceptions/subtask-not-found.exception';
-import { ChildTaskDto } from '../mappers/dto/child-task.dto';
+import { SubtaskDto } from '../mappers/dto/subtask.dto';
 
 @ApiTags('Profile Subtasks')
 @UseGuards(JwtAuthGuard)
@@ -51,20 +51,20 @@ export class ProfileSubtasksController {
   })
   @ApiOkResponse({
     description: 'List of subtasks for the specified task.',
-    type: [ChildTaskDto],
+    type: [SubtaskDto],
   })
   @ApiNotFoundResponse({ description: 'Task not found.' })
   @ApiParam({ name: 'id', type: Number, description: 'Task ID' })
   async findAll(
     @User() user: UserEntity,
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<ChildTaskDto[]> {
+  ): Promise<SubtaskDto[]> {
     const [tasks] = await this.tasksService.findAndCount({
       userId: user.id,
       parentId: id,
     });
 
-    return this.taskMapper.toDto(tasks, ChildTaskDto);
+    return this.taskMapper.toDto(tasks, SubtaskDto);
   }
 
   @Post()
@@ -91,7 +91,7 @@ export class ProfileSubtasksController {
         userId: user.id,
         parentId: IsNull(),
       },
-      ['children'],
+      ['subtasks'],
     );
 
     if (!task) {
@@ -103,13 +103,13 @@ export class ProfileSubtasksController {
       user,
     });
 
-    if (task.children === undefined) {
-      throw new Error('Children are not initialized');
+    if (task.subtasks === undefined) {
+      throw new Error('Subtasks are not initialized');
     }
 
-    task.children.push(subtask);
+    task.subtasks.push(subtask);
 
-    task.completed = task.areAllChildrenCompleted;
+    task.completed = task.areAllSubtasksCompleted;
 
     const updatedTask = await this.tasksService.save(task);
 
@@ -141,18 +141,18 @@ export class ProfileSubtasksController {
         userId: user.id,
         parentId: IsNull(),
       },
-      ['children'],
+      ['subtasks'],
     );
 
     if (!task) {
       throw new TaskNotFoundException(id);
     }
 
-    if (task.children === undefined) {
-      throw new Error('Children are not initialized');
+    if (task.subtasks === undefined) {
+      throw new Error('Subtasks are not initialized');
     }
 
-    const subtask: Task | undefined = task.children.find(
+    const subtask: Task | undefined = task.subtasks.find(
       (subtask) => subtask.id === subtaskId,
     );
 
@@ -162,7 +162,7 @@ export class ProfileSubtasksController {
 
     this.tasksService.update(subtask, updateSubtaskDto);
 
-    task.completed = task.areAllChildrenCompleted;
+    task.completed = task.areAllSubtasksCompleted;
 
     const updatedTask = await this.tasksService.save(task);
 
@@ -192,20 +192,20 @@ export class ProfileSubtasksController {
         userId: user.id,
         parentId: IsNull(),
       },
-      ['children'],
+      ['subtasks'],
     );
 
     if (!task) {
       throw new TaskNotFoundException(id);
     }
 
-    if (task.children === undefined) {
-      throw new Error('Children are not initialized');
+    if (task.subtasks === undefined) {
+      throw new Error('Subtasks are not initialized');
     }
 
-    task.children = task.children.filter((subtask) => subtask.id !== subtaskId);
+    task.subtasks = task.subtasks.filter((subtask) => subtask.id !== subtaskId);
 
-    task.completed = task.areAllChildrenCompleted;
+    task.completed = task.areAllSubtasksCompleted;
 
     const updatedTask = await this.tasksService.save(task);
 

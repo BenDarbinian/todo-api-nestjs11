@@ -15,7 +15,7 @@ export class Task {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => Task, (task) => task.children, {
+  @ManyToOne(() => Task, (task) => task.subtasks, {
     nullable: true,
     onDelete: 'CASCADE',
   })
@@ -28,7 +28,7 @@ export class Task {
   @OneToMany(() => Task, (task) => task.parent, {
     cascade: true,
   })
-  children?: Task[];
+  subtasks?: Task[];
 
   @Column({ type: 'varchar', length: 255 })
   title: string;
@@ -55,19 +55,19 @@ export class Task {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  get childrenCount(): number {
-    if (this.children === undefined) {
-      throw new Error('Children are not initialized');
+  get subtasksCount(): number {
+    if (this.subtasks === undefined) {
+      throw new Error('Subtasks are not initialized');
     }
 
-    return this.children.length;
+    return this.subtasks.length;
   }
 
-  get areAllChildrenCompleted(): boolean {
-    if (this.children === undefined) {
-      throw new Error('Children are not initialized');
+  get areAllSubtasksCompleted(): boolean {
+    if (this.subtasks === undefined) {
+      throw new Error('Subtasks are not initialized');
     }
 
-    return this.children.every((child) => child.completed);
+    return this.subtasks.every((subtask) => subtask.completed);
   }
 }
