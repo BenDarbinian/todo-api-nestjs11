@@ -1,11 +1,14 @@
 import {
-  IsBoolean,
+  IsArray,
   IsNotEmpty,
   IsOptional,
   IsString,
   Length,
+  ValidateNested,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { CreateSubtaskDto } from './create-subtask.dto';
+import { Type } from 'class-transformer';
 
 export class CreateTaskDto {
   @ApiProperty({
@@ -35,12 +38,14 @@ export class CreateTaskDto {
   readonly description: string | null = null;
 
   @ApiProperty({
-    description: 'Indicates if the task is completed',
-    required: false,
-    example: false,
-    default: false,
+    type: [CreateSubtaskDto],
+    description: 'The subtasks of the task',
+    required: true,
+    nullable: true,
   })
-  @IsBoolean()
+  @ValidateNested()
+  @Type(() => CreateSubtaskDto)
+  @IsArray()
   @IsOptional()
-  readonly completed: boolean = false;
+  readonly subtasks: CreateSubtaskDto[] = [];
 }

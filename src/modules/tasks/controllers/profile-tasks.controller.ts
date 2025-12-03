@@ -37,6 +37,7 @@ import { TaskListDto } from '../mappers/dto/task.list.dto';
 import { JwtAuthGuard } from '../../../common/auth/guards/jwt-auth.guard';
 import { User } from '../../../common/decorators/user.decorator';
 import { User as UserEntity } from '../../users/entities/user.entity';
+import { IsNull } from 'typeorm';
 
 @ApiTags('Profile Tasks')
 @UseGuards(JwtAuthGuard)
@@ -64,14 +65,24 @@ export class ProfileTasksController {
     @User() user: UserEntity,
     @Body() dto: CreateTaskDto,
   ): Promise<TaskDto> {
-    const task: Task = await this.tasksService.create({
+    const task: Task = this.tasksService.create({
       title: dto.title,
       description: dto.description,
-      completed: dto.completed,
       user,
     });
 
-    return this.taskMapper.toDto(task, TaskDto);
+    if (dto.subtasks.length > 0) {
+      task.subtasks = dto.subtasks.map((dto) => {
+        return this.tasksService.create({
+          title: dto.title,
+          user,
+        });
+      });
+    }
+
+    const createdTask = await this.tasksService.save(task);
+
+    return this.taskMapper.toDto(createdTask, TaskDto);
   }
 
   @Get()
@@ -92,6 +103,8 @@ export class ProfileTasksController {
       page: dto.page,
       skip: dto.skip,
       userId: user.id,
+      isParent: true,
+      relations: ['subtasks'],
     });
 
     return {
@@ -114,9 +127,14 @@ export class ProfileTasksController {
     @User() user: UserEntity,
     @Param('id', ParseIntPipe) id: number,
   ): Promise<TaskDto> {
-    const task: Task | null = await this.tasksService.findOneById(id, {
-      userId: user.id,
-    });
+    const task: Task | null = await this.tasksService.findOneById(
+      id,
+      {
+        userId: user.id,
+        parentId: IsNull(),
+      },
+      ['subtasks'],
+    );
 
     if (!task) {
       throw new TaskNotFoundException(id);
@@ -140,15 +158,22 @@ export class ProfileTasksController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateTaskDto: UpdateTaskDto,
   ): Promise<TaskDto> {
-    const task: Task | null = await this.tasksService.findOneById(id, {
-      userId: user.id,
-    });
+    const task: Task | null = await this.tasksService.findOneById(
+      id,
+      {
+        userId: user.id,
+        parentId: IsNull(),
+      },
+      ['subtasks'],
+    );
 
     if (!task) {
       throw new TaskNotFoundException(id);
     }
 
-    const updatedTask = await this.tasksService.update(task, updateTaskDto);
+    this.tasksService.update(task, updateTaskDto);
+
+    const updatedTask = await this.tasksService.save(task);
 
     return this.taskMapper.toDto(updatedTask, TaskDto);
   }
@@ -168,6 +193,7 @@ export class ProfileTasksController {
   ): Promise<void> {
     const task: Task | null = await this.tasksService.findOneById(id, {
       userId: user.id,
+      parentId: IsNull(),
     });
 
     if (!task) {

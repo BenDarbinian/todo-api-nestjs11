@@ -1,8 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import {
   DeleteResult,
   FindManyOptions,
   FindOptionsWhere,
+  IsNull,
+  Not,
   Repository,
 } from 'typeorm';
 import { Task } from './entities/task.entity';
@@ -18,21 +20,24 @@ export class TasksService {
     private readonly taskRepository: Repository<Task>,
   ) {}
 
-  async create(data: CreateTaskInput): Promise<Task> {
+  create(data: CreateTaskInput): Task {
     const task = new Task();
 
     task.title = data.title;
-    task.description = data.description;
-    task.completed = data.completed;
+    task.description = data.description ?? null;
+    task.completed = data.completed ?? false;
     task.user = data.user;
 
-    return this.taskRepository.save(task);
+    return task;
   }
 
   async findAndCount(data: GetTasksInput): Promise<[Task[], number]> {
+    const relations: string[] = data.relations ?? [];
+
     const options: FindManyOptions<Task> = {
       take: data.limit,
       skip: data.skip,
+      relations,
     };
 
     if (data.userId !== undefined) {
@@ -41,10 +46,22 @@ export class TasksService {
       };
     }
 
+    if (data.isParent !== undefined) {
+      options.where = {
+        parentId: data.isParent ? IsNull() : Not(IsNull()),
+      };
+    }
+
+    if (data.parentId !== undefined) {
+      options.where = {
+        parentId: data.parentId,
+      };
+    }
+
     return this.taskRepository.findAndCount(options);
   }
 
-  async update(task: Task, data: UpdateTaskInput): Promise<Task> {
+  update(task: Task, data: UpdateTaskInput) {
     if (data.title !== undefined) {
       task.title = data.title;
     }
@@ -54,10 +71,14 @@ export class TasksService {
     }
 
     if (data.completed !== undefined) {
+      if (!task.parentId && task.subtasksCount) {
+        throw new BadRequestException(
+          'Task will be completed when all subtasks are finished',
+        );
+      }
+
       task.completed = data.completed;
     }
-
-    return this.taskRepository.save(task);
   }
 
   async delete(id: number): Promise<DeleteResult> {
@@ -65,20 +86,24 @@ export class TasksService {
   }
 
   async findOneBy(
-    conditions: FindOptionsWhere<Task> | FindOptionsWhere<Task>[] | undefined,
+    conditions: FindOptionsWhere<Task> | FindOptionsWhere<Task>[],
+    relations?: string[],
   ): Promise<Task | null> {
     return this.taskRepository.findOne({
       where: conditions,
+      relations: relations?.length ? { subtasks: true } : undefined,
     });
   }
 
   async findOneById(
     id: number,
     filters?: FindOptionsWhere<Task> | FindOptionsWhere<Task>[],
+    relations?: string[],
   ): Promise<Task | null> {
-    return this.findOneBy({
-      id,
-      ...filters,
-    });
+    return this.findOneBy({ id, ...filters }, relations);
+  }
+
+  async save(task: Task): Promise<Task> {
+    return this.taskRepository.save(task);
   }
 }
