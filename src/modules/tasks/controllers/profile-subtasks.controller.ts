@@ -109,7 +109,7 @@ export class ProfileSubtasksController {
 
     task.subtasks.push(subtask);
 
-    task.completed = task.areAllSubtasksCompleted;
+    task.updateCompletionStatus();
 
     const updatedTask = await this.tasksService.save(task);
 
@@ -162,7 +162,7 @@ export class ProfileSubtasksController {
 
     this.tasksService.update(subtask, updateSubtaskDto);
 
-    task.completed = task.areAllSubtasksCompleted;
+    task.updateCompletionStatus();
 
     const updatedTask = await this.tasksService.save(task);
 
@@ -205,7 +205,7 @@ export class ProfileSubtasksController {
 
     task.subtasks = task.subtasks.filter((subtask) => subtask.id !== subtaskId);
 
-    task.completed = task.areAllSubtasksCompleted;
+    task.updateCompletionStatus();
 
     const updatedTask = await this.tasksService.save(task);
 

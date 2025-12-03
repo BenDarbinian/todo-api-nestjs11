@@ -34,11 +34,11 @@ export class TaskDto {
   description: string | null;
 
   @ApiProperty({
-    description: 'Indicates if the task is completed',
-    example: false,
+    description: 'The date when the task was completed',
+    example: '2023-04-05T12:00:00.000Z',
   })
   @Expose()
-  completed: boolean;
+  completedAt: Date | null;
 
   @ApiProperty({
     type: [SubtaskDto],

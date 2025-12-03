@@ -36,8 +36,8 @@ export class Task {
   @Column({ type: 'varchar', length: 512, nullable: true })
   description: string | null;
 
-  @Column({ type: 'boolean', default: false })
-  completed: boolean;
+  @Column({ type: 'datetime', precision: 6, nullable: true })
+  completedAt: Date | null;
 
   @ManyToOne(() => User, (user) => user.tasks, {
     nullable: true,
@@ -63,11 +63,19 @@ export class Task {
     return this.subtasks.length;
   }
 
-  get areAllSubtasksCompleted(): boolean {
+  updateCompletionStatus(): void {
     if (this.subtasks === undefined) {
       throw new Error('Subtasks are not initialized');
     }
 
-    return this.subtasks.every((subtask) => subtask.completed);
+    const allCompleted = this.subtasks.every(
+      (subtask) => !!subtask.completedAt,
+    );
+
+    if (allCompleted) {
+      this.completedAt = new Date();
+    } else {
+      this.completedAt = null;
+    }
   }
 }

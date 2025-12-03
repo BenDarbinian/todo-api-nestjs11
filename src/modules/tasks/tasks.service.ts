@@ -25,7 +25,7 @@ export class TasksService {
 
     task.title = data.title;
     task.description = data.description ?? null;
-    task.completed = data.completed ?? false;
+    task.completedAt = data.completed ? new Date() : null;
     task.user = data.user;
 
     return task;
@@ -77,7 +77,7 @@ export class TasksService {
         );
       }
 
-      task.completed = data.completed;
+      task.completedAt = data.completed ? new Date() : null;
     }
   }
 
