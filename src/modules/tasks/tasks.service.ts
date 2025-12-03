@@ -73,7 +73,7 @@ export class TasksService {
     if (data.completed !== undefined) {
       if (!task.parentId && task.childrenCount) {
         throw new BadRequestException(
-          'Task will be completed when subtasks finish',
+          'Task will be completed when all subtasks are finished',
         );
       }
 
