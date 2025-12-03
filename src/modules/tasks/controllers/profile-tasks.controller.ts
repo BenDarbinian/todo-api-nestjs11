@@ -71,6 +71,15 @@ export class ProfileTasksController {
       user,
     });
 
+    if (dto.subtasks.length > 0) {
+      task.children = dto.subtasks.map((dto) => {
+        return this.tasksService.create({
+          title: dto.title,
+          user,
+        });
+      });
+    }
+
     const createdTask = await this.tasksService.save(task);
 
     return this.taskMapper.toDto(createdTask, TaskDto);
@@ -149,10 +158,14 @@ export class ProfileTasksController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateTaskDto: UpdateTaskDto,
   ): Promise<TaskDto> {
-    const task: Task | null = await this.tasksService.findOneById(id, {
-      userId: user.id,
-      parentId: IsNull(),
-    });
+    const task: Task | null = await this.tasksService.findOneById(
+      id,
+      {
+        userId: user.id,
+        parentId: IsNull(),
+      },
+      ['children'],
+    );
 
     if (!task) {
       throw new TaskNotFoundException(id);

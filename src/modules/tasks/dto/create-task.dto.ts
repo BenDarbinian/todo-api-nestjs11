@@ -1,5 +1,14 @@
-import { IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Length,
+  ValidateNested,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { CreateSubtaskDto } from './create-subtask.dto';
+import { Type } from 'class-transformer';
 
 export class CreateTaskDto {
   @ApiProperty({
@@ -27,4 +36,16 @@ export class CreateTaskDto {
   @IsString()
   @IsOptional()
   readonly description: string | null = null;
+
+  @ApiProperty({
+    type: [CreateSubtaskDto],
+    description: 'The subtasks of the task',
+    required: true,
+    nullable: true,
+  })
+  @ValidateNested()
+  @Type(() => CreateSubtaskDto)
+  @IsArray()
+  @IsOptional()
+  readonly subtasks: CreateSubtaskDto[] = [];
 }
