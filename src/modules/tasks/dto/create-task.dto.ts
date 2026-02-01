@@ -9,6 +9,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { CreateSubtaskDto } from './create-subtask.dto';
 import { Type } from 'class-transformer';
+import { IsDateOnly } from '../../../common/validators/is-date-only.validator';
 
 export class CreateTaskDto {
   @ApiProperty({
@@ -36,6 +37,15 @@ export class CreateTaskDto {
   @IsString()
   @IsOptional()
   readonly description: string | null = null;
+
+  @ApiProperty({
+    description: 'The date of the task',
+    required: true,
+    example: '2025-08-31',
+  })
+  @IsDateOnly()
+  @IsNotEmpty()
+  readonly date: string;
 
   @ApiProperty({
     type: [CreateSubtaskDto],

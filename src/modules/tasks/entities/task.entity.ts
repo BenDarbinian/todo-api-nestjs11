@@ -49,6 +49,9 @@ export class Task {
   @Column({ type: 'int', nullable: false })
   userId: number;
 
+  @Column({ type: 'date', nullable: true, default: () => 'CURRENT_DATE' })
+  date: string | null;
+
   @CreateDateColumn()
   createdAt: Date;
 
