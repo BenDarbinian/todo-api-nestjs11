@@ -55,12 +55,20 @@ export class ProfileSubtasksController {
     @User() user: UserEntity,
     @Param('id', ParseIntPipe) id: number,
   ): Promise<SubtaskResource[]> {
-    const [tasks] = await this.tasksService.findAndCount({
-      userId: user.id,
-      parentId: id,
-    });
+    const parentTask: Task | null = await this.tasksService.findOneById(
+      id,
+      {
+        userId: user.id,
+        parentId: IsNull(),
+      },
+      ['subtasks'],
+    );
 
-    return SubtaskResource.collection(tasks);
+    if (!parentTask) {
+      throw new TaskNotFoundException(id);
+    }
+
+    return SubtaskResource.collection(parentTask.subtasks);
   }
 
   @Post()
