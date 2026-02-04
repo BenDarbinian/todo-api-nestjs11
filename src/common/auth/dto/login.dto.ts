@@ -1,5 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { CorrectEmailTypos } from '../../transformers/correct-email-typos.transformer';
+import { NormalizeEmail } from '../../transformers/normalize-email.transformer';
+import { Trim } from '../../transformers/trim.transformer';
 
 export class LoginDto {
   @ApiProperty({
@@ -13,6 +16,9 @@ export class LoginDto {
   @MaxLength(255)
   @IsEmail()
   @IsNotEmpty()
+  @NormalizeEmail()
+  @CorrectEmailTypos()
+  @Trim()
   readonly email: string;
 
   @ApiProperty({
