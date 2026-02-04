@@ -69,10 +69,14 @@ export class ProfileTasksController {
 
     if (dto.subtasks.length > 0) {
       task.subtasks = dto.subtasks.map((dto) => {
-        return this.tasksService.create({
+        const subtask = this.tasksService.create({
           title: dto.title,
           user,
         });
+
+        subtask.parent = task;
+
+        return subtask;
       });
     }
 

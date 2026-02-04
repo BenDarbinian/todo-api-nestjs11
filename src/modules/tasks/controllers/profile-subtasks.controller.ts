@@ -103,6 +103,8 @@ export class ProfileSubtasksController {
       throw new Error('Subtasks are not initialized');
     }
 
+    subtask.parent = task;
+
     task.subtasks.push(subtask);
 
     task.updateCompletionStatus();
