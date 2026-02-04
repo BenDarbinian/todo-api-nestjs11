@@ -34,29 +34,26 @@ export class TasksService {
   async findAndCount(data: GetTasksInput): Promise<[Task[], number]> {
     const relations: string[] = data.relations ?? [];
 
+    const where: FindOptionsWhere<Task> = {};
+
+    if (data.userId !== undefined) {
+      where.userId = data.userId;
+    }
+
+    if (data.isParent !== undefined) {
+      where.parentId = data.isParent ? IsNull() : Not(IsNull());
+    }
+
+    if (data.parentId !== undefined) {
+      where.parentId = data.parentId;
+    }
+
     const options: FindManyOptions<Task> = {
       take: data.limit,
       skip: data.skip,
       relations,
+      where,
     };
-
-    if (data.userId !== undefined) {
-      options.where = {
-        userId: data.userId,
-      };
-    }
-
-    if (data.isParent !== undefined) {
-      options.where = {
-        parentId: data.isParent ? IsNull() : Not(IsNull()),
-      };
-    }
-
-    if (data.parentId !== undefined) {
-      options.where = {
-        parentId: data.parentId,
-      };
-    }
 
     return this.taskRepository.findAndCount(options);
   }
