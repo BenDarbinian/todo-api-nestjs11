@@ -8,24 +8,20 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { ProfileDto } from '../mappers/dto/profile/profile.dto';
+import { ProfileResource } from '../resources/profile.resource';
 import { User } from '../entities/user.entity';
-import { UsersMapper } from '../mappers/users.mapper';
 
 @ApiTags('Users')
 @Controller('api/v1/users')
 export class UsersController {
-  constructor(
-    private readonly usersService: UsersService,
-    private readonly usersMapper: UsersMapper,
-  ) {}
+  constructor(private readonly usersService: UsersService) {}
 
   @ApiOperation({
     summary: 'Create a new user',
     description: 'Registers a new user in the system',
   })
   @ApiCreatedResponse({
-    type: ProfileDto,
+    type: ProfileResource,
     description: 'User successfully created',
   })
   @ApiBadRequestResponse({ description: 'Bad request - invalid data provided' })
@@ -40,6 +36,6 @@ export class UsersController {
 
     const savedUser: User = await this.usersService.save(user);
 
-    return this.usersMapper.toDto(savedUser, ProfileDto);
+    return new ProfileResource(savedUser);
   }
 }

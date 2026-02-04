@@ -31,9 +31,8 @@ import {
   ApiOperation,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { TaskMapper } from '../mappers/task.mapper';
-import { TaskDto } from '../mappers/dto/task.dto';
-import { TaskListDto } from '../mappers/dto/task.list.dto';
+import { TaskResource } from '../resources/task.resource';
+import { TaskListResource } from '../resources/task-list.resource';
 import { JwtAuthGuard } from '../../../common/auth/guards/jwt-auth.guard';
 import { User } from '../../../common/decorators/user.decorator';
 import { User as UserEntity } from '../../users/entities/user.entity';
@@ -44,10 +43,7 @@ import { IsNull } from 'typeorm';
 @ApiBearerAuth()
 @Controller('api/v1/users/me/tasks')
 export class ProfileTasksController {
-  constructor(
-    private readonly tasksService: TasksService,
-    private readonly taskMapper: TaskMapper,
-  ) {}
+  constructor(private readonly tasksService: TasksService) {}
 
   @Post()
   @ApiOperation({
@@ -57,14 +53,14 @@ export class ProfileTasksController {
   })
   @ApiCreatedResponse({
     description: 'The task has been successfully created.',
-    type: TaskDto,
+    type: TaskResource,
   })
   @ApiBadRequestResponse({ description: 'Invalid input data.' })
   @ApiBody({ type: CreateTaskDto })
   async create(
     @User() user: UserEntity,
     @Body() dto: CreateTaskDto,
-  ): Promise<TaskDto> {
+  ): Promise<TaskResource> {
     const task: Task = this.tasksService.create({
       title: dto.title,
       description: dto.description,
@@ -82,7 +78,7 @@ export class ProfileTasksController {
 
     const createdTask = await this.tasksService.save(task);
 
-    return this.taskMapper.toDto(createdTask, TaskDto);
+    return new TaskResource(createdTask);
   }
 
   @Get()
@@ -108,7 +104,7 @@ export class ProfileTasksController {
     });
 
     return {
-      data: this.taskMapper.toDto(tasks, TaskListDto),
+      data: TaskListResource.collection(tasks),
       total,
       page: dto.page,
       limit: dto.limit,
@@ -120,13 +116,16 @@ export class ProfileTasksController {
     summary: 'Get a task by ID',
     description: 'Retrieves the details of a specific task by its ID.',
   })
-  @ApiOkResponse({ description: 'Task retrieved successfully.', type: TaskDto })
+  @ApiOkResponse({
+    description: 'Task retrieved successfully.',
+    type: TaskResource,
+  })
   @ApiNotFoundResponse({ description: 'Task not found.' })
   @ApiParam({ name: 'id', type: Number, description: 'Task ID' })
   async findOne(
     @User() user: UserEntity,
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<TaskDto> {
+  ): Promise<TaskResource> {
     const task: Task | null = await this.tasksService.findOneById(
       id,
       {
@@ -140,7 +139,7 @@ export class ProfileTasksController {
       throw new TaskNotFoundException(id);
     }
 
-    return this.taskMapper.toDto(task, TaskDto);
+    return new TaskResource(task);
   }
 
   @Patch(':id')
@@ -148,7 +147,10 @@ export class ProfileTasksController {
     summary: 'Update a task by ID',
     description: 'Updates the details of a specific task by its ID.',
   })
-  @ApiOkResponse({ description: 'Task updated successfully.', type: TaskDto })
+  @ApiOkResponse({
+    description: 'Task updated successfully.',
+    type: TaskResource,
+  })
   @ApiNotFoundResponse({ description: 'Task not found.' })
   @ApiBadRequestResponse({ description: 'Invalid input data.' })
   @ApiParam({ name: 'id', type: Number, description: 'Task ID' })
@@ -157,7 +159,7 @@ export class ProfileTasksController {
     @User() user: UserEntity,
     @Param('id', ParseIntPipe) id: number,
     @Body() updateTaskDto: UpdateTaskDto,
-  ): Promise<TaskDto> {
+  ): Promise<TaskResource> {
     const task: Task | null = await this.tasksService.findOneById(
       id,
       {
@@ -175,7 +177,7 @@ export class ProfileTasksController {
 
     const updatedTask = await this.tasksService.save(task);
 
-    return this.taskMapper.toDto(updatedTask, TaskDto);
+    return new TaskResource(updatedTask);
   }
 
   @Delete(':id')

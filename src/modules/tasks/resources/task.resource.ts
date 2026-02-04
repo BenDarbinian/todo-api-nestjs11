@@ -1,27 +1,24 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Expose, Type } from 'class-transformer';
-import { SubtaskDto } from './subtask.dto';
+import { Task } from '../entities/task.entity';
+import { SubtaskResource } from './subtask.resource';
 
-export class TaskDto {
+export class TaskResource {
   @ApiProperty({
     description: 'Unique identifier of the task',
     example: 1,
   })
-  @Expose()
   id: number;
 
   @ApiProperty({
     description: 'Indicates if the task has subtasks',
     example: false,
   })
-  @Expose()
   hasSubtasks: boolean;
 
   @ApiProperty({
     description: 'The title of the task',
     example: 'Buy groceries',
   })
-  @Expose()
   title: string;
 
   @ApiProperty({
@@ -30,35 +27,44 @@ export class TaskDto {
     example: 'Milk, eggs, bread, and fruits',
     nullable: true,
   })
-  @Expose()
   description: string | null;
 
   @ApiProperty({
     description: 'The date when the task was completed',
     example: '2023-04-05T12:00:00.000Z',
   })
-  @Expose()
   completedAt: Date | null;
 
   @ApiProperty({
-    type: [SubtaskDto],
+    type: [SubtaskResource],
     description: 'Subtasks of the task',
   })
-  @Type(() => SubtaskDto)
-  @Expose()
-  subtasks: SubtaskDto[];
+  subtasks: SubtaskResource[];
 
   @ApiProperty({
     description: 'The date and time when the task was created',
     example: '2023-01-01T00:00:00.000Z',
   })
-  @Expose()
   createdAt: Date;
 
   @ApiProperty({
     description: 'The date and time when the task was last updated',
     example: '2023-01-01T00:00:00.000Z',
   })
-  @Expose()
   updatedAt: Date;
+
+  constructor(task: Task) {
+    this.id = task.id;
+    this.hasSubtasks = (task.subtasks?.length ?? 0) > 0;
+    this.title = task.title;
+    this.description = task.description;
+    this.completedAt = task.completedAt;
+    this.subtasks = SubtaskResource.collection(task.subtasks);
+    this.createdAt = task.createdAt;
+    this.updatedAt = task.updatedAt;
+  }
+
+  static collection(tasks?: Task[]): TaskResource[] {
+    return tasks?.map((task) => new TaskResource(task)) ?? [];
+  }
 }

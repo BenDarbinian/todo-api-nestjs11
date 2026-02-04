@@ -17,10 +17,9 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { ProfileDto } from '../mappers/dto/profile/profile.dto';
+import { ProfileResource } from '../resources/profile.resource';
 import { User } from '../../../common/decorators/user.decorator';
 import { User as UserEntity } from '../../users/entities/user.entity';
-import { UsersMapper } from '../mappers/users.mapper';
 import { JwtAuthGuard } from '../../../common/auth/guards/jwt-auth.guard';
 import { UpdateProfileNameDto } from '../dto/profile/update-profile-name.dto';
 import { UsersService } from '../users.service';
@@ -32,10 +31,7 @@ import { ChangeProfilePasswordDto } from '../dto/profile/change-profile-password
 @ApiBearerAuth()
 @Controller('api/v1/users/me')
 export class ProfileController {
-  constructor(
-    private readonly usersService: UsersService,
-    private readonly usersMapper: UsersMapper,
-  ) {}
+  constructor(private readonly usersService: UsersService) {}
 
   @ApiOperation({
     summary: 'Get user profile',
@@ -43,15 +39,15 @@ export class ProfileController {
   })
   @ApiResponse({
     status: HttpStatus.OK,
-    type: ProfileDto,
+    type: ProfileResource,
     description: 'User profile information',
   })
   @ApiUnauthorizedResponse({ description: 'User is not authenticated' })
   @ApiForbiddenResponse({ description: 'User does not have permission' })
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
   @Get()
-  public getProfile(@User() user: UserEntity): ProfileDto {
-    return this.usersMapper.toDto(user, ProfileDto);
+  public getProfile(@User() user: UserEntity): ProfileResource {
+    return new ProfileResource(user);
   }
 
   @ApiOperation({
@@ -71,11 +67,11 @@ export class ProfileController {
   public async updateFullName(
     @User() user: UserEntity,
     @Body() dto: UpdateProfileNameDto,
-  ): Promise<ProfileDto> {
+  ): Promise<ProfileResource> {
     this.usersService.updateName(user, dto.name);
     const savedUser = await this.usersService.save(user);
 
-    return this.usersMapper.toDto(savedUser, ProfileDto);
+    return new ProfileResource(savedUser);
   }
 
   @ApiOperation({
@@ -95,11 +91,11 @@ export class ProfileController {
   public async updateEmail(
     @User() user: UserEntity,
     @Body() dto: UpdateProfileEmailDto,
-  ): Promise<ProfileDto> {
+  ): Promise<ProfileResource> {
     await this.usersService.updateEmail(user, dto.email);
     const savedUser = await this.usersService.save(user);
 
-    return this.usersMapper.toDto(savedUser, ProfileDto);
+    return new ProfileResource(savedUser);
   }
 
   @ApiOperation({

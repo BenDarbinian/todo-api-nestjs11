@@ -23,8 +23,8 @@ import {
   ApiOperation,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { TaskMapper } from '../mappers/task.mapper';
-import { TaskDto } from '../mappers/dto/task.dto';
+import { TaskResource } from '../resources/task.resource';
+import { SubtaskResource } from '../resources/subtask.resource';
 import { JwtAuthGuard } from '../../../common/auth/guards/jwt-auth.guard';
 import { User } from '../../../common/decorators/user.decorator';
 import { User as UserEntity } from '../../users/entities/user.entity';
@@ -32,17 +32,13 @@ import { IsNull } from 'typeorm';
 import { CreateSubtaskDto } from '../dto/create-subtask.dto';
 import { UpdateSubtaskDto } from '../dto/update-subtask.dto';
 import { SubtaskNotFoundException } from '../exceptions/subtask-not-found.exception';
-import { SubtaskDto } from '../mappers/dto/subtask.dto';
 
 @ApiTags('Profile Subtasks')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 @Controller('api/v1/users/me/tasks/:id/subtasks')
 export class ProfileSubtasksController {
-  constructor(
-    private readonly tasksService: TasksService,
-    private readonly taskMapper: TaskMapper,
-  ) {}
+  constructor(private readonly tasksService: TasksService) {}
 
   @Get()
   @ApiOperation({
@@ -51,20 +47,20 @@ export class ProfileSubtasksController {
   })
   @ApiOkResponse({
     description: 'List of subtasks for the specified task.',
-    type: [SubtaskDto],
+    type: [SubtaskResource],
   })
   @ApiNotFoundResponse({ description: 'Task not found.' })
   @ApiParam({ name: 'id', type: Number, description: 'Task ID' })
   async findAll(
     @User() user: UserEntity,
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<SubtaskDto[]> {
+  ): Promise<SubtaskResource[]> {
     const [tasks] = await this.tasksService.findAndCount({
       userId: user.id,
       parentId: id,
     });
 
-    return this.taskMapper.toDto(tasks, SubtaskDto);
+    return SubtaskResource.collection(tasks);
   }
 
   @Post()
@@ -74,7 +70,7 @@ export class ProfileSubtasksController {
   })
   @ApiCreatedResponse({
     description: 'The subtask has been successfully created.',
-    type: TaskDto,
+    type: TaskResource,
   })
   @ApiNotFoundResponse({ description: 'Task not found.' })
   @ApiBadRequestResponse({ description: 'Invalid input data.' })
@@ -84,7 +80,7 @@ export class ProfileSubtasksController {
     @User() user: UserEntity,
     @Param('id', ParseIntPipe) id: number,
     @Body() createSubtaskDto: CreateSubtaskDto,
-  ): Promise<TaskDto> {
+  ): Promise<TaskResource> {
     const task: Task | null = await this.tasksService.findOneById(
       id,
       {
@@ -113,7 +109,7 @@ export class ProfileSubtasksController {
 
     const updatedTask = await this.tasksService.save(task);
 
-    return this.taskMapper.toDto(updatedTask, TaskDto);
+    return new TaskResource(updatedTask);
   }
   @Patch(':subtaskId')
   @ApiOperation({
@@ -122,7 +118,7 @@ export class ProfileSubtasksController {
   })
   @ApiOkResponse({
     description: 'Subtask updated successfully.',
-    type: TaskDto,
+    type: TaskResource,
   })
   @ApiNotFoundResponse({ description: 'Task or subtask not found.' })
   @ApiBadRequestResponse({ description: 'Invalid input data.' })
@@ -134,7 +130,7 @@ export class ProfileSubtasksController {
     @Param('id', ParseIntPipe) id: number,
     @Param('subtaskId', ParseIntPipe) subtaskId: number,
     @Body() updateSubtaskDto: UpdateSubtaskDto,
-  ): Promise<TaskDto> {
+  ): Promise<TaskResource> {
     const task: Task | null = await this.tasksService.findOneById(
       id,
       {
@@ -166,7 +162,7 @@ export class ProfileSubtasksController {
 
     const updatedTask = await this.tasksService.save(task);
 
-    return this.taskMapper.toDto(updatedTask, TaskDto);
+    return new TaskResource(updatedTask);
   }
 
   @Delete(':subtaskId')
@@ -176,7 +172,7 @@ export class ProfileSubtasksController {
   })
   @ApiOkResponse({
     description: 'Subtask deleted successfully.',
-    type: TaskDto,
+    type: TaskResource,
   })
   @ApiNotFoundResponse({ description: 'Task or subtask not found.' })
   @ApiParam({ name: 'id', type: Number, description: 'Task ID' })
@@ -185,7 +181,7 @@ export class ProfileSubtasksController {
     @User() user: UserEntity,
     @Param('id', ParseIntPipe) id: number,
     @Param('subtaskId', ParseIntPipe) subtaskId: number,
-  ): Promise<TaskDto> {
+  ): Promise<TaskResource> {
     const task: Task | null = await this.tasksService.findOneById(
       id,
       {
@@ -209,6 +205,6 @@ export class ProfileSubtasksController {
 
     const updatedTask = await this.tasksService.save(task);
 
-    return this.taskMapper.toDto(updatedTask, TaskDto);
+    return new TaskResource(updatedTask);
   }
 }

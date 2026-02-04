@@ -1,14 +1,11 @@
 import { BasePaginatedResponseDto } from '../../../common/dto/base-paginated-response.dto';
-import { TaskListDto } from '../mappers/dto/task.list.dto';
-import { Expose, Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+import { TaskListResource } from '../resources/task-list.resource';
 
-export class TasksPaginatedResponseDto extends BasePaginatedResponseDto<TaskListDto> {
+export class TasksPaginatedResponseDto extends BasePaginatedResponseDto<TaskListResource> {
   @ApiProperty({
     isArray: true,
-    type: TaskListDto,
+    type: TaskListResource,
   })
-  @Expose()
-  @Type(() => TaskListDto)
-  declare data: TaskListDto[];
+  declare data: TaskListResource[];
 }
