@@ -64,6 +64,7 @@ export class ProfileTasksController {
     const task: Task = this.tasksService.create({
       title: dto.title,
       description: dto.description,
+      date: dto.date ?? new Date().toISOString().slice(0, 10),
       user,
     });
 

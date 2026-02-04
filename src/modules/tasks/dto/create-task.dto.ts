@@ -40,12 +40,12 @@ export class CreateTaskDto {
 
   @ApiProperty({
     description: 'The date of the task',
-    required: true,
+    required: false,
     example: '2025-08-31',
   })
   @IsDateOnly()
-  @IsNotEmpty()
-  readonly date: string;
+  @IsOptional()
+  readonly date?: string;
 
   @ApiProperty({
     type: [CreateSubtaskDto],

@@ -26,6 +26,7 @@ export class TasksService {
     task.title = data.title;
     task.description = data.description ?? null;
     task.completedAt = data.completed ? new Date() : null;
+    task.date = data.date ?? null;
     task.user = data.user;
 
     return task;
