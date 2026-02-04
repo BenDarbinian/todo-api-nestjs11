@@ -27,6 +27,7 @@ export class Task {
 
   @OneToMany(() => Task, (task) => task.parent, {
     cascade: true,
+    orphanedRowAction: 'delete',
   })
   subtasks?: Task[];
 
