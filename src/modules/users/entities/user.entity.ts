@@ -22,6 +22,9 @@ export class User {
   @Column({ type: 'varchar', length: 255, nullable: false })
   passwordHash: string;
 
+  @Column({ type: 'datetime', precision: 6, nullable: true })
+  emailVerifiedAt: Date | null;
+
   @Column({ type: 'datetime', precision: 6 })
   passwordChangedAt: Date;
 

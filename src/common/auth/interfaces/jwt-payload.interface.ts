@@ -3,4 +3,5 @@ export interface JwtPayload {
   exp: number;
   iat: number;
   refreshAfter: number;
+  emailVerifiedAt: number | null;
 }

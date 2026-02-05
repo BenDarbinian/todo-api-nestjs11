@@ -46,6 +46,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException();
     }
 
+    if (!user.emailVerifiedAt) {
+      throw new UnauthorizedException();
+    }
+
     if (user.passwordChangedAt) {
       const passwordChangedTimestamp: number = user.passwordChangedAt.getTime();
       const issuedAtTimestamp: number = payload.iat * 1000;
@@ -53,6 +57,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       if (issuedAtTimestamp < passwordChangedTimestamp) {
         throw new UnauthorizedException();
       }
+    }
+
+    const payloadEmailVerifiedAt = payload.emailVerifiedAt ?? null;
+    const userEmailVerifiedAt = user.emailVerifiedAt.getTime();
+
+    if (payloadEmailVerifiedAt !== userEmailVerifiedAt) {
+      throw new UnauthorizedException();
     }
 
     return user;

@@ -27,6 +27,13 @@ export class ProfileResource {
   passwordChangedAt: Date;
 
   @ApiProperty({
+    description: 'Date and time when the user verified their email',
+    example: '2025-01-02T00:00:00.000Z',
+    nullable: true,
+  })
+  emailVerifiedAt: Date | null;
+
+  @ApiProperty({
     description: 'Date and time when the user was created',
     example: '2025-01-01T00:00:00.000Z',
   })
@@ -43,6 +50,7 @@ export class ProfileResource {
     this.name = user.name;
     this.email = user.email;
     this.passwordChangedAt = user.passwordChangedAt;
+    this.emailVerifiedAt = user.emailVerifiedAt ?? null;
     this.createdAt = user.createdAt;
     this.updatedAt = user.updatedAt;
   }

@@ -27,6 +27,7 @@ export class UsersService {
     user.email = data.email;
     user.passwordHash = await this.hashService.hash(data.password);
     user.passwordChangedAt = new Date();
+    user.emailVerifiedAt = null;
 
     return user;
   }
@@ -85,6 +86,7 @@ export class UsersService {
     }
 
     user.email = email;
+    user.emailVerifiedAt = null;
   }
 
   async validatePassword(

@@ -10,11 +10,15 @@ import {
 } from '@nestjs/swagger';
 import { ProfileResource } from '../resources/profile.resource';
 import { User } from '../entities/user.entity';
+import { EmailVerificationService } from '../../email-verification/email-verification.service';
 
 @ApiTags('Users')
 @Controller('api/v1/users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly emailVerificationService: EmailVerificationService,
+  ) {}
 
   @ApiOperation({
     summary: 'Create a new user',
@@ -35,6 +39,8 @@ export class UsersController {
     });
 
     const savedUser: User = await this.usersService.save(user);
+
+    await this.emailVerificationService.requestVerification(savedUser);
 
     return new ProfileResource(savedUser);
   }

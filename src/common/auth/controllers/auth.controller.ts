@@ -12,6 +12,7 @@ import {
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
   ApiOperation,
   ApiResponse,
@@ -45,6 +46,9 @@ export class AuthController {
   })
   @ApiUnauthorizedResponse({
     description: 'Invalid credentials - incorrect email or password',
+  })
+  @ApiForbiddenResponse({
+    description: 'Email is not verified',
   })
   @ApiInternalServerErrorResponse({
     description: 'Internal server error',

@@ -13,12 +13,23 @@ import { HashModule } from './common/hash/hash.module';
 import sessionConfig from './config/session.config';
 import jwtConfig from './config/jwt.config';
 import { AuthModule } from './common/auth/auth.module';
+import frontConfig from './config/front.config';
+import mailerConfig from './config/mailer.config';
+import { BullModule } from '@nestjs/bullmq';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, databaseConfig, redisConfig, sessionConfig, jwtConfig],
+      load: [
+        appConfig,
+        databaseConfig,
+        redisConfig,
+        sessionConfig,
+        jwtConfig,
+        frontConfig,
+        mailerConfig,
+      ],
     }),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
@@ -56,6 +67,26 @@ import { AuthModule } from './common/auth/auth.module';
 
         return {
           stores: [createKeyv(redisOptions)],
+        };
+      },
+    }),
+    BullModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const redisConfig: RedisConfig | undefined =
+          configService.get<RedisConfig>('redis');
+
+        if (!redisConfig) {
+          throw new ConfigNotInitializedException('redisConfig');
+        }
+
+        return {
+          connection: {
+            host: redisConfig.host,
+            port: redisConfig.port,
+            username: redisConfig.username,
+            password: redisConfig.password,
+          },
         };
       },
     }),

@@ -25,13 +25,17 @@ import { UpdateProfileNameDto } from '../dto/profile/update-profile-name.dto';
 import { UsersService } from '../users.service';
 import { UpdateProfileEmailDto } from '../dto/profile/update-profile-email.dto';
 import { ChangeProfilePasswordDto } from '../dto/profile/change-profile-password.dto';
+import { EmailVerificationService } from '../../email-verification/email-verification.service';
 
 @ApiTags('Profile')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 @Controller('api/v1/users/me')
 export class ProfileController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly emailVerificationService: EmailVerificationService,
+  ) {}
 
   @ApiOperation({
     summary: 'Get user profile',
@@ -94,6 +98,8 @@ export class ProfileController {
   ): Promise<ProfileResource> {
     await this.usersService.updateEmail(user, dto.email);
     const savedUser = await this.usersService.save(user);
+
+    await this.emailVerificationService.requestVerification(savedUser);
 
     return new ProfileResource(savedUser);
   }

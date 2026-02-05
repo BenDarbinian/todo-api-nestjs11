@@ -1,6 +1,7 @@
 import { Cache } from '@nestjs/cache-manager';
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -44,10 +45,18 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials.');
     }
 
+    if (!user.emailVerifiedAt) {
+      throw new ForbiddenException('Email is not verified.');
+    }
+
     const { expiresAt, refreshAfter } = this.getTokenExpirationTimes();
 
     return {
-      accessToken: this.generateAccessToken(user.id, refreshAfter),
+      accessToken: this.generateAccessToken(
+        user.id,
+        refreshAfter,
+        user.emailVerifiedAt.getTime(),
+      ),
       expiresAt: new Date(expiresAt).toISOString(),
       refreshAfter: new Date(refreshAfter).toISOString(),
     };
@@ -74,7 +83,11 @@ export class AuthService {
     const { expiresAt, refreshAfter } = this.getTokenExpirationTimes();
 
     return {
-      accessToken: this.generateAccessToken(payload.sub, refreshAfter),
+      accessToken: this.generateAccessToken(
+        payload.sub,
+        refreshAfter,
+        payload.emailVerifiedAt ?? null,
+      ),
       expiresAt: new Date(expiresAt).toISOString(),
       refreshAfter: new Date(refreshAfter).toISOString(),
     };
@@ -119,9 +132,13 @@ export class AuthService {
     return { expiresAt, refreshAfter };
   }
 
-  private generateAccessToken(userId: number, refreshAfter: number): string {
+  private generateAccessToken(
+    userId: number,
+    refreshAfter: number,
+    emailVerifiedAt: number | null,
+  ): string {
     return this.jwtService.sign(
-      { sub: userId, refreshAfter },
+      { sub: userId, refreshAfter, emailVerifiedAt },
       { expiresIn: this.sessionConfig.lifetimeMs / 1000 },
     );
   }
