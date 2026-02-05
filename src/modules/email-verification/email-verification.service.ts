@@ -102,6 +102,6 @@ export class EmailVerificationService {
   }
 
   private buildVerificationLink(token: string): string {
-    return `${this.frontConfig.publicUrl}/api/v1/users/verify-email?token=${token}`;
+    return `${this.frontConfig.baseUrl}/api/v1/users/verify-email?token=${token}`;
   }
 }
