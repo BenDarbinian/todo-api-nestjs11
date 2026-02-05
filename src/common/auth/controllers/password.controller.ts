@@ -19,7 +19,8 @@ export class PasswordController {
 
   @ApiOperation({
     summary: 'Initiate password recovery',
-    description: 'Sends a password recovery email to the user with a reset token',
+    description:
+      'Sends a password recovery email to the user with a reset token',
   })
   @ApiResponse({
     status: HttpStatus.NO_CONTENT,
