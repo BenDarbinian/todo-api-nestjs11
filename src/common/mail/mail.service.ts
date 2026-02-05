@@ -49,4 +49,30 @@ export class MailService {
       },
     });
   }
+
+  async sendPasswordRecoveryMessage(
+    email: string,
+    fullName: string,
+    recoveryLink: string,
+  ): Promise<void> {
+    if (!this.mailerConfig.host) {
+      this.logger.warn(
+        `SMTP not configured - skip password recovery for ${email}`,
+      );
+      this.logger.warn(`Recovery link: ${recoveryLink}`);
+      return;
+    }
+
+    await this.mailQueue.add('sendPasswordRecoveryMessage', {
+      options: {
+        to: email,
+        subject: 'Восстановление пароля',
+        template: 'password-recovery-message',
+        context: {
+          fullName,
+          recoveryLink,
+        },
+      },
+    });
+  }
 }

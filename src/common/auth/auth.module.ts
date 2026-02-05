@@ -8,11 +8,14 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtConfig } from '../../config/jwt.config';
 import { ConfigNotInitializedException } from '../exceptions/config-not-initialized.exception';
 import { HashModule } from '../hash/hash.module';
+import { PasswordController } from './controllers/password.controller';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
     UsersModule,
     HashModule,
+    MailModule,
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
@@ -30,6 +33,6 @@ import { HashModule } from '../hash/hash.module';
     }),
   ],
   providers: [AuthService, JwtStrategy],
-  controllers: [AuthController],
+  controllers: [AuthController, PasswordController],
 })
 export class AuthModule {}
