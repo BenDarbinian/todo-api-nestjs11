@@ -34,24 +34,7 @@ export class TasksService {
 
   async findAndCount(data: GetTasksInput): Promise<[Task[], number]> {
     const relations: string[] = data.relations ?? [];
-
-    const where: FindOptionsWhere<Task> = {};
-
-    if (data.userId !== undefined) {
-      where.userId = data.userId;
-    }
-
-    if (data.date !== undefined) {
-      where.date = data.date;
-    }
-
-    if (data.isParent !== undefined) {
-      where.parentId = data.isParent ? IsNull() : Not(IsNull());
-    }
-
-    if (data.parentId !== undefined) {
-      where.parentId = data.parentId;
-    }
+    const where = this.buildWhere(data);
 
     const options: FindManyOptions<Task> = {
       take: data.limit,
@@ -61,6 +44,12 @@ export class TasksService {
     };
 
     return this.taskRepository.findAndCount(options);
+  }
+
+  async count(data: GetTasksInput): Promise<number> {
+    const where = this.buildWhere(data);
+
+    return this.taskRepository.count({ where });
   }
 
   update(task: Task, data: UpdateTaskInput) {
@@ -107,5 +96,31 @@ export class TasksService {
 
   async save(task: Task): Promise<Task> {
     return this.taskRepository.save(task);
+  }
+
+  private buildWhere(data: GetTasksInput): FindOptionsWhere<Task> {
+    const where: FindOptionsWhere<Task> = {};
+
+    if (data.userId !== undefined) {
+      where.userId = data.userId;
+    }
+
+    if (data.date !== undefined) {
+      where.date = data.date;
+    }
+
+    if (data.completed !== undefined) {
+      where.completedAt = data.completed ? Not(IsNull()) : IsNull();
+    }
+
+    if (data.isParent !== undefined) {
+      where.parentId = data.isParent ? IsNull() : Not(IsNull());
+    }
+
+    if (data.parentId !== undefined) {
+      where.parentId = data.parentId;
+    }
+
+    return where;
   }
 }

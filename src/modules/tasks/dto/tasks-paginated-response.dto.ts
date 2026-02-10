@@ -8,4 +8,10 @@ export class TasksPaginatedResponseDto extends BasePaginatedResponseDto<TaskList
     type: TaskListResource,
   })
   declare data: TaskListResource[];
+
+  @ApiProperty({
+    description: 'Total number of completed tasks',
+    example: 25,
+  })
+  completed: number;
 }

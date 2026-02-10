@@ -99,19 +99,29 @@ export class ProfileTasksController {
     @User() user: UserEntity,
     @Query() dto: GetTasksDto,
   ): Promise<TasksPaginatedResponseDto> {
-    const [tasks, total] = await this.tasksService.findAndCount({
-      limit: dto.limit,
-      page: dto.page,
-      skip: dto.skip,
-      date: dto.date,
-      userId: user.id,
-      isParent: true,
-      relations: ['subtasks'],
-    });
+    const [[tasks, total], completed] = await Promise.all([
+      this.tasksService.findAndCount({
+        limit: dto.limit,
+        page: dto.page,
+        skip: dto.skip,
+        date: dto.date,
+        completed: dto.completed,
+        userId: user.id,
+        isParent: true,
+        relations: ['subtasks'],
+      }),
+      this.tasksService.count({
+        date: dto.date,
+        completed: true,
+        userId: user.id,
+        isParent: true,
+      }),
+    ]);
 
     return {
       data: TaskListResource.collection(tasks),
       total,
+      completed,
       page: dto.page,
       limit: dto.limit,
     };

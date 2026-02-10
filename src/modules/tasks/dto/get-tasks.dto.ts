@@ -1,7 +1,8 @@
 import { BaseGetDto } from '../../../common/dto/base-get.dto';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional } from 'class-validator';
+import { IsBoolean, IsOptional } from 'class-validator';
 import { IsDateOnly } from '../../../common/validators/is-date-only.validator';
+import { ToBoolean } from '../../../common/transformers/to-boolean.transformer';
 
 export class GetTasksDto extends BaseGetDto {
   @ApiProperty({
@@ -12,4 +13,14 @@ export class GetTasksDto extends BaseGetDto {
   @IsDateOnly()
   @IsOptional()
   readonly date?: string;
+
+  @ApiProperty({
+    description: 'Filter tasks by completion status',
+    required: false,
+    example: true,
+  })
+  @IsBoolean()
+  @IsOptional()
+  @ToBoolean()
+  readonly completed?: boolean;
 }

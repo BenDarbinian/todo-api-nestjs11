@@ -3,6 +3,7 @@ export interface GetTasksInput {
   page?: number;
   skip?: number;
   date?: string;
+  completed?: boolean;
   userId?: number;
   parentId?: number;
   isParent?: boolean;
