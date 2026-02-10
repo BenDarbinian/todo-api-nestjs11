@@ -103,6 +103,7 @@ export class ProfileTasksController {
       limit: dto.limit,
       page: dto.page,
       skip: dto.skip,
+      date: dto.date,
       userId: user.id,
       isParent: true,
       relations: ['subtasks'],

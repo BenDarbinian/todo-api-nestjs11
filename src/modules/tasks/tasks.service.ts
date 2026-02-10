@@ -41,6 +41,10 @@ export class TasksService {
       where.userId = data.userId;
     }
 
+    if (data.date !== undefined) {
+      where.date = data.date;
+    }
+
     if (data.isParent !== undefined) {
       where.parentId = data.isParent ? IsNull() : Not(IsNull());
     }
