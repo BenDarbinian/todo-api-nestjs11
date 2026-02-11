@@ -5,11 +5,13 @@ export interface FrontConfig {
   baseUrl: string;
   passwordRecoveryPath: string;
   passwordRecoveryUrl: string;
+  emailVerificationPath: string;
+  emailVerificationUrl: string;
 }
 
 export default registerAs('front', (): FrontConfig => {
   const baseUrl = EnvUtils.getEnvVariable('FRONT_BASE_URL', {
-    defaultValue: 'http://localhost:8088',
+    defaultValue: 'http://localhost:5173',
   });
   const passwordRecoveryPath = EnvUtils.getEnvVariable(
     'FRONT_PASSWORD_RECOVERY_PATH',
@@ -17,15 +19,26 @@ export default registerAs('front', (): FrontConfig => {
       defaultValue: '/password-recovery',
     },
   );
+  const emailVerificationPath = EnvUtils.getEnvVariable(
+    'FRONT_EMAIL_VERIFICATION_PATH',
+    {
+      defaultValue: '/verify-email',
+    },
+  );
 
   const normalizedBase = baseUrl.replace(/\/+$/, '');
-  const normalizedPath = passwordRecoveryPath.startsWith('/')
+  const normalizedPasswordRecoveryPath = passwordRecoveryPath.startsWith('/')
     ? passwordRecoveryPath
     : `/${passwordRecoveryPath}`;
+  const normalizedEmailVerificationPath = emailVerificationPath.startsWith('/')
+    ? emailVerificationPath
+    : `/${emailVerificationPath}`;
 
   return {
     baseUrl,
     passwordRecoveryPath,
-    passwordRecoveryUrl: `${normalizedBase}${normalizedPath}`,
+    passwordRecoveryUrl: `${normalizedBase}${normalizedPasswordRecoveryPath}`,
+    emailVerificationPath,
+    emailVerificationUrl: `${normalizedBase}${normalizedEmailVerificationPath}`,
   };
 });
