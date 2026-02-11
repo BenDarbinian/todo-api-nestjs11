@@ -1,7 +1,6 @@
 import { Cache } from '@nestjs/cache-manager';
 import {
   BadRequestException,
-  ForbiddenException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -22,6 +21,7 @@ import { ConfigNotInitializedException } from '../exceptions/config-not-initiali
 import { HashService } from '../hash/hash.service';
 import { MailService } from '../mail/mail.service';
 import { FrontConfig } from '../../config/front.config';
+import { EmailNotVerifiedException } from './exceptions/email-not-verified.exception';
 
 @Injectable()
 export class AuthService {
@@ -63,7 +63,7 @@ export class AuthService {
     }
 
     if (!user.emailVerifiedAt) {
-      throw new ForbiddenException('Email is not verified.');
+      throw new EmailNotVerifiedException();
     }
 
     const { expiresAt, refreshAfter } = this.getTokenExpirationTimes();

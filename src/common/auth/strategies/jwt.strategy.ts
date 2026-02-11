@@ -9,6 +9,7 @@ import { UsersService } from '../../../modules/users/users.service';
 import { ConfigNotInitializedException } from '../../exceptions/config-not-initialized.exception';
 import { AuthService } from '../auth.service';
 import { JwtPayload } from '../interfaces/jwt-payload.interface';
+import { EmailNotVerifiedException } from '../exceptions/email-not-verified.exception';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -47,7 +48,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     if (!user.emailVerifiedAt) {
-      throw new UnauthorizedException();
+      throw new EmailNotVerifiedException();
     }
 
     if (user.passwordChangedAt) {
