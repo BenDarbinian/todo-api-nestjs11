@@ -7,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
+import { SmsVerificationStatus } from '../enums/sms-verification-status.enum';
 
 @Entity('email_verification_tokens')
 export class EmailVerificationToken {
@@ -27,10 +28,20 @@ export class EmailVerificationToken {
   tokenHash: string;
 
   @Column({ type: 'datetime', precision: 6, nullable: false })
+  sentAt: Date;
+
+  @Column({ type: 'datetime', precision: 6, nullable: false })
   expiresAt: Date;
 
   @Column({ type: 'datetime', precision: 6, nullable: true })
   usedAt: Date | null;
+
+  @Column({
+    type: 'enum',
+    enum: SmsVerificationStatus,
+    default: SmsVerificationStatus.PENDING,
+  })
+  status: SmsVerificationStatus;
 
   @CreateDateColumn()
   createdAt: Date;

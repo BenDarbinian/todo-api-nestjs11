@@ -3,13 +3,17 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { MailProcessor } from './mail.processor';
 import { MailService } from './mail.service';
 import { MailerConfig } from '../../config/mailer.config';
 import { ConfigNotInitializedException } from '../exceptions/config-not-initialized.exception';
+import { EmailVerificationToken } from '../../modules/email-verification/entities/email-verification-token.entity';
+import { EmailVerificationMailJobHandler } from './handlers/email-verification-mail-job.handler';
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([EmailVerificationToken]),
     BullModule.registerQueue({
       name: 'mailQueue',
     }),
@@ -63,7 +67,7 @@ import { ConfigNotInitializedException } from '../exceptions/config-not-initiali
       },
     }),
   ],
-  providers: [MailService, MailProcessor],
+  providers: [MailService, MailProcessor, EmailVerificationMailJobHandler],
   exports: [MailService],
 })
 export class MailModule {}

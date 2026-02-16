@@ -4,6 +4,23 @@ import { ConfigService } from '@nestjs/config';
 import { Queue } from 'bullmq';
 import { MailerConfig } from '../../config/mailer.config';
 import { ConfigNotInitializedException } from '../exceptions/config-not-initialized.exception';
+import { ISendMailOptions } from '@nestjs-modules/mailer';
+
+export const MAIL_JOB_NAMES = {
+  SEND_EMAIL_VERIFICATION: 'sendEmailVerificationMessage',
+  SEND_PASSWORD_RECOVERY: 'sendPasswordRecoveryMessage',
+} as const;
+
+interface BaseMailJobData {
+  options: ISendMailOptions;
+}
+
+export interface SendEmailVerificationMessageJobData extends BaseMailJobData {
+  verificationTokenId: number;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface SendPasswordRecoveryMessageJobData extends BaseMailJobData {}
 
 @Injectable()
 export class MailService {
@@ -28,16 +45,18 @@ export class MailService {
     email: string,
     fullName: string,
     verificationLink: string,
-  ): Promise<void> {
+    verificationTokenId: number,
+  ): Promise<boolean> {
     if (!this.mailerConfig.host) {
       this.logger.warn(
         `SMTP not configured - skip email verification for ${email}`,
       );
       this.logger.warn(`Verification link: ${verificationLink}`);
-      return;
+      return false;
     }
 
-    await this.mailQueue.add('sendEmailVerificationMessage', {
+    await this.mailQueue.add(MAIL_JOB_NAMES.SEND_EMAIL_VERIFICATION, {
+      verificationTokenId,
       options: {
         to: email,
         subject: 'Подтвердите email',
@@ -48,6 +67,8 @@ export class MailService {
         },
       },
     });
+
+    return true;
   }
 
   async sendPasswordRecoveryMessage(
@@ -63,7 +84,7 @@ export class MailService {
       return;
     }
 
-    await this.mailQueue.add('sendPasswordRecoveryMessage', {
+    await this.mailQueue.add(MAIL_JOB_NAMES.SEND_PASSWORD_RECOVERY, {
       options: {
         to: email,
         subject: 'Восстановление пароля',
