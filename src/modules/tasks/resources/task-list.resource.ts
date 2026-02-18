@@ -26,11 +26,20 @@ export class TaskListResource {
   })
   completedAt: Date | null;
 
+  @ApiProperty({
+    type: 'string',
+    description: 'The date of the task',
+    example: '2025-08-31',
+    nullable: true,
+  })
+  date: string | null;
+
   constructor(task: Task) {
     this.id = task.id;
     this.subtasksCount = task.subtasks ? task.subtasks.length : 0;
     this.title = task.title;
     this.completedAt = task.completedAt;
+    this.date = task.date;
   }
 
   static collection(tasks?: Task[]): TaskListResource[] {

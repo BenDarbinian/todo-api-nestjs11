@@ -36,6 +36,14 @@ export class TaskResource {
   completedAt: Date | null;
 
   @ApiProperty({
+    type: 'string',
+    description: 'The date of the task',
+    example: '2025-08-31',
+    nullable: true,
+  })
+  date: string | null;
+
+  @ApiProperty({
     type: [SubtaskResource],
     description: 'Subtasks of the task',
   })
@@ -59,6 +67,7 @@ export class TaskResource {
     this.title = task.title;
     this.description = task.description;
     this.completedAt = task.completedAt;
+    this.date = task.date;
     this.subtasks = SubtaskResource.collection(task.subtasks);
     this.createdAt = task.createdAt;
     this.updatedAt = task.updatedAt;
