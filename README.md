@@ -1,89 +1,156 @@
-# Todo API
+# Ritmio API
+
+Backend API for **Ritmio** - a habit and daily task tracking product.
+
+This repository contains the NestJS backend with authentication, profile management, tasks/subtasks, email verification, password recovery, and async email processing.
+
+## Current Capabilities
+
+- User registration and login sessions
+- JWT-based auth (access token + token refresh endpoint)
+- Profile endpoints (`me`, update name/email/password)
+- Email verification flow with token statuses (`pending`, `sent`, `used`, `expired`, `failed`)
+- Password recovery (forgot/reset)
+- Task management for authenticated users
+- Nested subtasks under parent tasks
+- Swagger API docs
+- Async mail jobs with BullMQ + Redis
+- MariaDB persistence via TypeORM migrations
+
+## Tech Stack
+
+- Node.js 20+
+- TypeScript
+- NestJS 11
+- TypeORM
+- MariaDB
+- Redis
+- BullMQ
+- Swagger (`/api`)
+- Jest (unit + e2e)
 
 ## Prerequisites
 
 - Node.js >= 20
 - Yarn 1.x
+- Docker + Docker Compose
 
-## Setup Instructions
+## Quick Start
 
-1. Create an `.env` file by copying the contents of `.env.example`:
+1. Clone and install dependencies:
 
-   ```bash
-   cp .env.example .env
-   ```
+```bash
+yarn install
+```
 
-2. Populate the `.env` file with the appropriate values for each environment variable as required for the project.
+2. Create local env file:
 
+```bash
+cp .env.example .env
+```
 
-3. Install the necessary dependencies by running the following command:
+3. Start infrastructure:
 
-   ```bash
-   yarn install
-   ```
+```bash
+docker-compose up -d
+```
 
-4. Start the containers by running the following commands:
+4. Run database migrations:
 
-   ```bash
-   docker-compose up -d
-   ```
+```bash
+yarn migration:run
+```
 
-5. Launch the development server using the command:
+5. Start API in dev mode:
 
-   ```bash
-   yarn start
-   ```
+```bash
+yarn start:dev
+```
 
-   Alternatively, you can start [Run and Debug](https://code.visualstudio.com/docs/editor/debugging) in Visual Studio Code.
+API will start on `http://localhost:8080` by default.  
+Swagger docs: `http://localhost:8080/api`.
 
-   Run in watch mode:
+## Environment Variables
 
-   ```bash
-   yarn start:dev
-   ```
+Use `.env.example` as base.
 
-   Run in production mode:
+### App
 
-   ```bash
-   yarn start:prod
-   ```
+- `APP_HOST` - API host (default `localhost`)
+- `APP_PORT` - API port (default `8080`)
+- `APP_ENV` - environment (`local`, `dev`, `stage`, `production`)
 
-## Run Tests
+### Frontend Links (used in email links)
 
-1. Unit tests:
+- `FRONT_BASE_URL`
+- `FRONT_PASSWORD_RECOVERY_PATH`
+- `FRONT_EMAIL_VERIFICATION_PATH`
 
-   ```bash
-   yarn test
-   ```
+### Auth / Session
 
-2. E2E tests:
+- `JWT_SECRET` - required
+- `SESSION_LIFETIME` (minutes, optional, default `120`)
+- `SESSION_REFRESH_THRESHOLD` (minutes, optional, default `60`)
+- `SESSION_PASSWORD_RECOVERY_LIFETIME` (minutes, default `60`)
 
-   ```bash
-   yarn test:e2e
-   ```
+### Database
 
-3. Test coverage:
+- `DB_HOST`
+- `DB_PORT`
+- `DB_DATABASE`
+- `DB_USER`
+- `DB_PASSWORD`
 
-   ```bash
-   yarn test:cov
-   ```
+### Redis / Queues
+
+- `REDIS_HOST`
+- `REDIS_PORT` (optional, default `6379`)
+- `REDIS_USERNAME` (optional, default `default`)
+- `REDIS_PASSWORD`
+
+### SMTP (optional in local development)
+
+- `SMTP_HOST`
+- `SMTP_PORT`
+- `SMTP_USERNAME`
+- `SMTP_PASSWORD`
+- `SMTP_SECURE`
+- `SMTP_TLS`
+- `EMAIL_FROM`
+- `EMAIL_REPLY_TO`
+
+If SMTP is not configured, the API logs verification/recovery links and skips real email sending.
+
+## Scripts
+
+- `yarn start` - start app
+- `yarn start:dev` - start in watch mode
+- `yarn start:prod` - run compiled app
+- `yarn build` - build to `dist/`
+- `yarn lint` - lint with autofix
+- `yarn format` - format source and tests
+- `yarn test` - unit tests
+- `yarn test:e2e` - e2e tests
+- `yarn test:cov` - coverage report
 
 ## Migrations
 
-1. To run migrations, use the command:
+- `yarn migration:run` - apply migrations
+- `yarn migration:revert` - rollback last migration
+- `yarn migration:generate ./src/database/migrations/<name>` - generate migration
 
-   ```bash
-   yarn migration:run
-   ```
+## Main API Areas
 
-2. To revert a migration, execute:
-
-   ```bash
-   yarn migration:revert
-   ```
-
-3. To generate a migration file based on schema changes, use:
-
-   ```bash
-   yarn migration:generate ./src/database/migrations/{name}
-   ```
+- `POST /api/v1/users` - registration
+- `GET /api/v1/users/verify-email` - verify email
+- `POST /api/v1/users/resend-verification` - resend verification email
+- `POST /api/v1/sessions` - login
+- `GET /api/v1/sessions/new-token` - refresh token
+- `DELETE /api/v1/sessions` - logout
+- `POST /api/v1/password/forgot` - request password reset
+- `POST /api/v1/password/reset` - reset password
+- `GET /api/v1/users/me` - get profile
+- `PATCH /api/v1/users/me/name` - update name
+- `PATCH /api/v1/users/me/email` - update email
+- `PATCH /api/v1/users/me/password` - change password
+- `GET/POST/PATCH/DELETE /api/v1/users/me/tasks...` - tasks and subtasks CRUD
